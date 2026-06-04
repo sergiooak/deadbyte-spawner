@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Nuxt/Nitro output
+.nuxt/
+.output/
+dist/
+
+# DeadByte local runtime data
+.deadbyte/
+
+# Test and coverage output
+coverage/
+.vitest/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Database local dumps
+*.dump
+*.sql.gz
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# TypeScript
+*.tsbuildinfo

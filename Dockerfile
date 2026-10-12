@@ -21,9 +21,9 @@ RUN pnpm build
 FROM base AS runtime
 
 # git: clonar o bot · chromium: whatsapp-web.js · ffmpeg: figurinhas animadas
-# dumb-init: repassa sinais e recolhe processos zumbis do Chromium
+# dumb-init: repassa sinais e recolhe processos zumbis do Chromium · procps: pkill para Chromium órfão
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl git dumb-init \
+      ca-certificates curl git dumb-init procps \
       chromium ffmpeg \
       fonts-liberation fonts-noto-color-emoji \
     && rm -rf /var/lib/apt/lists/*
@@ -32,6 +32,7 @@ ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=3000 \
     NITRO_PORT=3000 \
+    NITRO_SHUTDOWN_TIMEOUT=45000 \
     DEADBYTE_DATA_DIR=/data \
     DEADBYTE_REPOS_DIR=/data/repos \
     DEADBYTE_INSTANCES_DIR=/data/instances \

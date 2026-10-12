@@ -9,6 +9,8 @@ export type ManagedProcess = {
   }
   stdoutBuffer: string
   stderrBuffer: string
+  /** Últimas linhas de stderr, anexadas ao log quando o bot cai. */
+  stderrTail: string[]
   startedAt: number
   stopping: boolean
   exited: Promise<void>

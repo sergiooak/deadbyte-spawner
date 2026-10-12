@@ -32,7 +32,7 @@
           <ul class="divide-y divide-default">
             <li v-for="(isSet, name) in settings.secrets" :key="name" class="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
               <span class="font-mono text-sm text-highlighted">{{ name }}</span>
-              <UBadge :color="isSet ? 'success' : 'neutral'" variant="subtle" :icon="isSet ? 'i-lucide-check' : 'i-lucide-minus'">
+              <UBadge :color="isSet ? 'success' : 'neutral'" variant="subtle" :icon="isSet ? 'i-nucleo-check' : 'i-nucleo-minus'">
                 {{ isSet ? 'definida' : 'ausente' }}
               </UBadge>
             </li>

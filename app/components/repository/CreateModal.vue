@@ -22,7 +22,7 @@
 
     <template #footer>
       <UButton color="neutral" variant="ghost" @click="open = false">Cancelar</UButton>
-      <UButton type="submit" form="create-repository" icon="i-lucide-plus" :loading="loading">Cadastrar</UButton>
+      <UButton type="submit" form="create-repository" icon="i-nucleo-plus" :loading="loading">Cadastrar</UButton>
     </template>
   </UModal>
 </template>

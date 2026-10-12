@@ -3,21 +3,21 @@ import type { InstanceStatus } from '~/types'
 type BadgeColor = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
 
 export const STATUS_META: Record<InstanceStatus, { label: string; color: BadgeColor; icon: string; live?: boolean }> = {
-  created: { label: 'Criada', color: 'neutral', icon: 'i-lucide-sparkles' },
-  installing: { label: 'Instalando', color: 'info', icon: 'i-lucide-package', live: true },
-  stopped: { label: 'Parada', color: 'neutral', icon: 'i-lucide-circle-stop' },
-  starting: { label: 'Iniciando', color: 'info', icon: 'i-lucide-loader-circle', live: true },
-  waiting_qr: { label: 'Aguardando QR', color: 'warning', icon: 'i-lucide-qr-code', live: true },
-  authenticated: { label: 'Autenticada', color: 'info', icon: 'i-lucide-shield-check', live: true },
-  ready: { label: 'Online', color: 'success', icon: 'i-lucide-radio', live: true },
-  disconnected: { label: 'Desconectada', color: 'warning', icon: 'i-lucide-unplug' },
-  stopping: { label: 'Parando', color: 'neutral', icon: 'i-lucide-loader-circle', live: true },
-  crashed: { label: 'Caiu', color: 'error', icon: 'i-lucide-skull' },
-  error: { label: 'Erro', color: 'error', icon: 'i-lucide-triangle-alert' }
+  created: { label: 'Criada', color: 'neutral', icon: 'i-nucleo-sparkle' },
+  installing: { label: 'Instalando', color: 'info', icon: 'i-nucleo-box-2', live: true },
+  stopped: { label: 'Parada', color: 'neutral', icon: 'i-nucleo-media-stop' },
+  starting: { label: 'Iniciando', color: 'info', icon: 'i-nucleo-loader', live: true },
+  waiting_qr: { label: 'Aguardando QR', color: 'warning', icon: 'i-nucleo-qrcode', live: true },
+  authenticated: { label: 'Autenticada', color: 'info', icon: 'i-nucleo-shield-check', live: true },
+  ready: { label: 'Online', color: 'success', icon: 'i-nucleo-wifi', live: true },
+  disconnected: { label: 'Desconectada', color: 'warning', icon: 'i-nucleo-link-broken' },
+  stopping: { label: 'Parando', color: 'neutral', icon: 'i-nucleo-loader', live: true },
+  crashed: { label: 'Caiu', color: 'error', icon: 'i-nucleo-skull' },
+  error: { label: 'Erro', color: 'error', icon: 'i-nucleo-triangle-warning' }
 }
 
 export function statusMeta(status: string | null | undefined) {
-  return STATUS_META[(status ?? 'created') as InstanceStatus] ?? { label: status ?? '—', color: 'neutral' as const, icon: 'i-lucide-circle' }
+  return STATUS_META[(status ?? 'created') as InstanceStatus] ?? { label: status ?? '—', color: 'neutral' as const, icon: 'i-nucleo-circle-dots' }
 }
 
 /** Status em que existe (ou deveria existir) um processo do bot rodando. */

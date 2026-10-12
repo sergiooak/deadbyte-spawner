@@ -6,18 +6,18 @@
           <UDashboardSidebarCollapse />
         </template>
         <template #right>
-          <UButton icon="i-lucide-plus" @click="createOpen = true">Novo repositório</UButton>
+          <UButton icon="i-nucleo-plus" @click="createOpen = true">Novo repositório</UButton>
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
+      <BrandIllustration v-if="!repositories?.length" name="empty-repositories" />
       <UEmpty
         v-if="!repositories?.length"
-        icon="i-lucide-git-branch"
         title="Nenhum repositório"
         description="Cadastre o repositório git do bot. O spawner clona, instala, builda e importa os comandos."
-        :actions="[{ label: 'Novo repositório', icon: 'i-lucide-plus', onClick: () => { createOpen = true } }]"
+        :actions="[{ label: 'Novo repositório', icon: 'i-nucleo-plus', onClick: () => { createOpen = true } }]"
         variant="subtle"
       />
 
@@ -33,8 +33,8 @@
           :ui="{ description: 'font-mono text-xs truncate' }"
         >
           <div class="flex flex-wrap items-center gap-2 text-xs text-muted">
-            <UBadge color="neutral" variant="soft" icon="i-lucide-git-branch" size="sm">{{ repository.defaultBranch }}</UBadge>
-            <UBadge color="neutral" variant="soft" icon="i-lucide-bot" size="sm">
+            <UBadge color="neutral" variant="soft" icon="i-nucleo-code-branch" size="sm">{{ repository.defaultBranch }}</UBadge>
+            <UBadge color="neutral" variant="soft" icon="i-nucleo-robot" size="sm">
               {{ instanceCount(repository.slug) }} {{ instanceCount(repository.slug) === 1 ? 'instância' : 'instâncias' }}
             </UBadge>
             <span class="ms-auto">atualizado {{ timeAgo(repository.updatedAt) }}</span>

@@ -1,9 +1,9 @@
 <template>
   <div class="space-y-4">
     <div class="flex flex-wrap items-center gap-2">
-      <UInput v-model="search" icon="i-lucide-search" placeholder="Buscar comando ou alias…" class="w-full sm:w-72">
+      <UInput v-model="search" icon="i-nucleo-magnifier" placeholder="Buscar comando ou alias…" class="w-full sm:w-72">
         <template v-if="search" #trailing>
-          <UButton color="neutral" variant="link" size="sm" icon="i-lucide-x" aria-label="Limpar busca" @click="search = ''" />
+          <UButton color="neutral" variant="link" size="sm" icon="i-nucleo-xmark" aria-label="Limpar busca" @click="search = ''" />
         </template>
       </UInput>
       <USelect v-model="group" :items="groupItems" class="w-full sm:w-44" />
@@ -17,7 +17,7 @@
       v-if="needsRestart"
       color="info"
       variant="subtle"
-      icon="i-lucide-info"
+      icon="i-nucleo-circle-info"
       title="Alterações salvas"
       description="Reinicie a instância para o bot carregar a nova configuração."
       :actions="restartActions"
@@ -25,10 +25,10 @@
 
     <UEmpty
       v-if="!rows.length"
-      icon="i-lucide-terminal-square"
+      icon="i-nucleo-console"
       title="Nenhum comando"
       description="Sincronize o repositório para importar os comandos do manifesto do bot."
-      :actions="[{ label: 'Ir para o repositório', to: `/repositories/${repositorySlug}`, icon: 'i-lucide-git-branch' }]"
+      :actions="[{ label: 'Ir para o repositório', to: `/repositories/${repositorySlug}`, icon: 'i-nucleo-code-branch' }]"
     />
 
     <div v-else class="space-y-6">
@@ -37,7 +37,7 @@
           <h3 class="text-xs font-semibold tracking-wide text-muted uppercase">{{ section.group }}</h3>
           <UBadge color="neutral" variant="soft" size="sm">{{ section.items.length }}</UBadge>
         </div>
-        <div class="divide-y divide-default overflow-hidden rounded-lg ring ring-default">
+        <div class="divide-y divide-default overflow-hidden ring ring-default">
           <div
             v-for="row in section.items"
             :key="row.commandId"
@@ -71,11 +71,11 @@
 
     <div
       v-if="dirtyRows.length"
-      class="sticky bottom-4 z-10 mx-auto flex w-fit items-center gap-3 rounded-full bg-inverted px-4 py-2 text-inverted shadow-xl"
+      class="sticky bottom-4 z-10 mx-auto flex w-fit items-center gap-3 bg-inverted px-4 py-2 text-inverted shadow-xl"
     >
       <span class="text-sm">{{ dirtyRows.length }} {{ dirtyRows.length === 1 ? 'alteração' : 'alterações' }}</span>
       <UButton size="sm" color="neutral" variant="ghost" class="text-inverted hover:bg-white/10" @click="reset">Descartar</UButton>
-      <UButton size="sm" icon="i-lucide-save" :loading="saving" class="rounded-full" @click="save">Salvar</UButton>
+      <UButton size="sm" icon="i-nucleo-floppy-disk" :loading="saving" class="" @click="save">Salvar</UButton>
     </div>
   </div>
 </template>
@@ -142,7 +142,7 @@ const groupedRows = computed(() => {
 })
 
 const restartActions = computed(() =>
-  props.running ? [{ label: 'Reiniciar agora', icon: 'i-lucide-rotate-cw', color: 'info' as const, onClick: () => { needsRestart.value = false; emit('restart') } }] : []
+  props.running ? [{ label: 'Reiniciar agora', icon: 'i-nucleo-arrow-rotate-clockwise', color: 'info' as const, onClick: () => { needsRestart.value = false; emit('restart') } }] : []
 )
 
 async function save() {

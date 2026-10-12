@@ -24,7 +24,7 @@ export async function withToast<T>(task: () => Promise<T>, messages: { success?:
   try {
     const result = await task()
     if (messages.success) {
-      toast.add({ title: messages.success, color: 'success', icon: 'i-lucide-circle-check' })
+      toast.add({ title: messages.success, color: 'success', icon: 'i-nucleo-circle-check' })
     }
     return result
   } catch (error) {
@@ -32,7 +32,7 @@ export async function withToast<T>(task: () => Promise<T>, messages: { success?:
       title: messages.error ?? 'Falhou',
       description: errorMessage(error),
       color: 'error',
-      icon: 'i-lucide-circle-x'
+      icon: 'i-nucleo-circle-xmark'
     })
     return undefined
   }

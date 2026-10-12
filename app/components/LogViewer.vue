@@ -1,14 +1,14 @@
 <template>
-  <div class="flex min-h-0 flex-col overflow-hidden rounded-lg bg-neutral-950 ring ring-neutral-800" :class="heightClass">
+  <div class="flex min-h-0 flex-col overflow-hidden bg-black ring ring-neutral-800" :class="heightClass">
     <div class="flex flex-wrap items-center gap-2 border-b border-neutral-800 px-3 py-2">
       <div class="flex items-center gap-1.5">
-        <span class="size-2.5 rounded-full bg-red-500/80" />
-        <span class="size-2.5 rounded-full bg-amber-400/80" />
-        <span class="size-2.5 rounded-full bg-emerald-500/80" />
+        <span class="size-2.5 bg-red-500/80" />
+        <span class="size-2.5 bg-amber-400/80" />
+        <span class="size-2.5 bg-emerald-500/80" />
       </div>
       <UInput
         v-model="filter"
-        icon="i-lucide-search"
+        icon="i-nucleo-magnifier"
         placeholder="Filtrar…"
         size="xs"
         variant="none"
@@ -34,7 +34,7 @@
             color="neutral"
             :variant="eventsVisible ? 'soft' : 'ghost'"
             class="text-neutral-300"
-            icon="i-lucide-zap"
+            icon="i-nucleo-bolt"
             aria-label="Alternar eventos"
             @click="eventsVisible = !eventsVisible"
           />
@@ -45,13 +45,13 @@
             color="neutral"
             variant="ghost"
             class="text-neutral-300"
-            :icon="autoRefresh ? 'i-lucide-pause' : 'i-lucide-play'"
+            :icon="autoRefresh ? 'i-nucleo-media-pause' : 'i-nucleo-media-play'"
             :aria-label="autoRefresh ? 'Pausar' : 'Retomar'"
             @click="autoRefresh = !autoRefresh"
           />
         </UTooltip>
         <UTooltip text="Copiar">
-          <UButton size="xs" color="neutral" variant="ghost" class="text-neutral-300" icon="i-lucide-copy" aria-label="Copiar logs" @click="copy" />
+          <UButton size="xs" color="neutral" variant="ghost" class="text-neutral-300" icon="i-nucleo-copy" aria-label="Copiar logs" @click="copy" />
         </UTooltip>
       </div>
     </div>
@@ -67,7 +67,7 @@
     <div class="flex items-center justify-between border-t border-neutral-800 px-3 py-1.5 text-[11px] text-neutral-500">
       <span>{{ visible.length }} linhas{{ hiddenEvents ? ` · ${hiddenEvents} eventos ocultos` : '' }}</span>
       <span class="flex items-center gap-1.5">
-        <span class="size-1.5 rounded-full" :class="autoRefresh ? 'bg-emerald-500' : 'bg-neutral-600'" />
+        <span class="size-1.5" :class="autoRefresh ? 'bg-emerald-500' : 'bg-neutral-600'" />
         {{ autoRefresh ? 'ao vivo' : 'pausado' }}
       </span>
     </div>
@@ -143,6 +143,6 @@ watch(
 
 async function copy() {
   await navigator.clipboard.writeText(visible.value.map((line) => `${line.createdAt} [${line.stream}] ${line.line}`).join('\n'))
-  useToast().add({ title: 'Logs copiados', icon: 'i-lucide-clipboard-check', color: 'success' })
+  useToast().add({ title: 'Logs copiados', icon: 'i-nucleo-clipboard-check', color: 'success' })
 }
 </script>

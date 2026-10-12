@@ -2,16 +2,85 @@
 @import "@nuxt/ui";
 
 @theme static {
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Corpo: técnica e de cantos cortados, combina com o visual quadrado */
+  --font-sans: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+  /* Mono: a mais legível para logs (0/O e 1/l/I bem distintos) */
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Títulos, marca e números: pixel como o Nucleo Pixel, mas legível com acentos */
+  --font-pixel: "Pixelify Sans", "JetBrains Mono", monospace;
 }
 
+/* Tudo quadrado */
 :root {
-  --ui-radius: 0.5rem;
+  --ui-radius: 0rem;
+}
+
+/* Dark only, alto contraste: fundo preto, bordas visíveis, texto quase branco */
+.dark {
+  --ui-primary: var(--ui-color-primary-400);
+  --ui-bg: #000000;
+  --ui-bg-muted: var(--ui-color-neutral-950);
+  --ui-bg-elevated: var(--ui-color-neutral-900);
+  --ui-bg-accented: var(--ui-color-neutral-800);
+  --ui-bg-inverted: var(--ui-color-neutral-50);
+  --ui-border: var(--ui-color-neutral-800);
+  --ui-border-muted: var(--ui-color-neutral-900);
+  --ui-border-accented: var(--ui-color-neutral-700);
+  --ui-text-dimmed: var(--ui-color-neutral-500);
+  --ui-text-muted: var(--ui-color-neutral-400);
+  --ui-text-toned: var(--ui-color-neutral-300);
+  --ui-text: var(--ui-color-neutral-200);
+  --ui-text-highlighted: #ffffff;
+}
+
+body {
+  background: var(--ui-bg);
+}
+
+/* Traço pixel nítido em tamanhos que não são múltiplos da grade 24 */
+svg.iconify * {
+  shape-rendering: crispEdges;
+}
+
+/* Brilho neon reutilizável */
+.neon-text {
+  color: var(--ui-primary);
+  text-shadow:
+    0 0 6px color-mix(in oklab, var(--ui-primary) 70%, transparent),
+    0 0 18px color-mix(in oklab, var(--ui-primary) 45%, transparent);
+}
+
+.neon-ring {
+  box-shadow:
+    0 0 0 1px var(--ui-primary),
+    0 0 22px -6px var(--ui-primary);
+}
+
+.neon-dot {
+  box-shadow: 0 0 8px 1px currentColor;
+}
+
+/* Fundo de grade com vinheta, usado no login e no topo do painel */
+.grid-backdrop {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--ui-primary) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--ui-primary) 9%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at center, black 25%, transparent 75%);
+}
+
+/* Linhas de varredura discretas, efeito de monitor */
+.scanlines {
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgb(255 255 255 / 0.025) 2px 3px);
 }
 
 /* Barra de rolagem discreta nos visualizadores de log */
 .log-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--ui-border-accented) transparent;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--ui-primary) 35%, transparent);
+  color: #ffffff;
 }

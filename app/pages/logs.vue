@@ -10,7 +10,7 @@
             v-model="selected"
             :items="items"
             placeholder="Escolha a instância"
-            icon="i-lucide-bot"
+            icon="i-nucleo-robot"
             class="w-56"
           />
         </template>
@@ -20,7 +20,7 @@
     <template #body>
       <UEmpty
         v-if="!instances?.length"
-        icon="i-lucide-scroll-text"
+        icon="i-nucleo-scroll"
         title="Sem instâncias"
         description="Os logs aparecem aqui quando alguma instância estiver rodando."
         variant="subtle"

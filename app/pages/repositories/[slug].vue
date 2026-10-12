@@ -7,12 +7,12 @@
         </template>
         <template #title>
           <div class="flex min-w-0 items-center gap-3">
-            <UButton to="/repositories" icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Voltar" />
+            <UButton to="/repositories" icon="i-nucleo-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Voltar" />
             <span class="truncate">{{ repository?.name ?? slug }}</span>
           </div>
         </template>
         <template #right>
-          <UButton icon="i-lucide-refresh-cw" :loading="syncing" :disabled="!repository" @click="sync">
+          <UButton icon="i-nucleo-arrow-dashed-rotate-clockwise" :loading="syncing" :disabled="!repository" @click="sync">
             {{ syncing ? 'Sincronizando…' : 'Sincronizar' }}
           </UButton>
         </template>
@@ -26,7 +26,7 @@
     <template #body>
       <UEmpty
         v-if="error?.statusCode === 404"
-        icon="i-lucide-search-x"
+        icon="i-nucleo-magnifier-alert"
         title="Repositório não encontrado"
         :actions="[{ label: 'Voltar', to: '/repositories' }]"
       />
@@ -36,7 +36,7 @@
           v-if="syncing"
           color="info"
           variant="subtle"
-          icon="i-lucide-loader-circle"
+          icon="i-nucleo-loader"
           title="Sincronizando"
           description="Clonando, instalando dependências, buildando e lendo o manifesto. A primeira vez pode levar alguns minutos."
           :ui="{ icon: 'animate-spin' }"
@@ -51,7 +51,7 @@
           v-else-if="syncError"
           color="error"
           variant="subtle"
-          icon="i-lucide-circle-x"
+          icon="i-nucleo-circle-xmark"
           title="A sincronização falhou"
           close
           @update:open="syncError = ''"
@@ -65,7 +65,7 @@
           v-else-if="lastSync"
           color="success"
           variant="subtle"
-          icon="i-lucide-circle-check"
+          icon="i-nucleo-circle-check"
           title="Sincronizado"
           :description="`${lastSync.addedCommands} novos · ${lastSync.updatedCommands} atualizados · ${lastSync.removedCommands} removidos · commit ${shortHash(lastSync.commitHash)} · ${(lastSync.durationMs / 1000).toFixed(0)}s`"
           close
@@ -76,7 +76,7 @@
           v-if="!commands?.length && !syncing"
           color="warning"
           variant="subtle"
-          icon="i-lucide-download"
+          icon="i-nucleo-download"
           title="Ainda não sincronizado"
           description="Sincronize para baixar o código e importar os comandos antes de criar instâncias."
         />
@@ -84,7 +84,7 @@
         <!-- Comandos -->
         <div v-if="tab === 'commands'" class="space-y-4">
           <div class="flex flex-wrap items-center gap-2">
-            <UInput v-model="search" icon="i-lucide-search" placeholder="Buscar comando…" class="w-full sm:w-72" />
+            <UInput v-model="search" icon="i-nucleo-magnifier" placeholder="Buscar comando…" class="w-full sm:w-72" />
             <USelect v-model="statusFilter" :items="statusItems" class="w-full sm:w-40" />
             <p class="ms-auto text-sm text-muted">{{ activeCount }} comandos ativos</p>
           </div>
@@ -101,9 +101,9 @@
             </template>
             <template #supports-cell="{ row }">
               <div class="flex gap-1">
-                <UTooltip v-if="row.original.supportsPrivate" text="Privado"><UIcon name="i-lucide-user" class="size-4 text-muted" /></UTooltip>
-                <UTooltip v-if="row.original.supportsGroups" text="Grupos"><UIcon name="i-lucide-users" class="size-4 text-muted" /></UTooltip>
-                <UTooltip v-if="row.original.supportsImplicit" text="Implícito (sem prefixo)"><UIcon name="i-lucide-sparkles" class="size-4 text-muted" /></UTooltip>
+                <UTooltip v-if="row.original.supportsPrivate" text="Privado"><UIcon name="i-nucleo-person" class="size-4 text-muted" /></UTooltip>
+                <UTooltip v-if="row.original.supportsGroups" text="Grupos"><UIcon name="i-nucleo-people" class="size-4 text-muted" /></UTooltip>
+                <UTooltip v-if="row.original.supportsImplicit" text="Implícito (sem prefixo)"><UIcon name="i-nucleo-sparkle" class="size-4 text-muted" /></UTooltip>
               </div>
             </template>
             <template #status-cell="{ row }">
@@ -112,17 +112,17 @@
               </UBadge>
             </template>
             <template #empty>
-              <UEmpty icon="i-lucide-terminal-square" title="Nenhum comando" variant="naked" />
+              <UEmpty icon="i-nucleo-console" title="Nenhum comando" variant="naked" />
             </template>
           </UTable>
         </div>
 
         <!-- Versões -->
         <UCard v-else-if="tab === 'versions'" :ui="{ body: 'p-0 sm:p-0' }">
-          <UEmpty v-if="!versions?.length" icon="i-lucide-history" title="Nenhuma versão sincronizada" variant="naked" class="py-10" />
+          <UEmpty v-if="!versions?.length" icon="i-nucleo-history" title="Nenhuma versão sincronizada" variant="naked" class="py-10" />
           <ul v-else class="divide-y divide-default">
             <li v-for="(version, index) in versions" :key="version.id" class="flex items-center gap-4 px-5 py-3">
-              <UIcon name="i-lucide-git-commit-horizontal" class="size-5 shrink-0 text-muted" />
+              <UIcon name="i-nucleo-code-commit" class="size-5 shrink-0 text-muted" />
               <div class="min-w-0 flex-1">
                 <p class="text-sm text-highlighted">
                   <span class="font-mono">{{ shortHash(version.commitHash) }}</span>
@@ -153,7 +153,7 @@
                 <UFormField label="Iniciar" name="startCommand"><UInput v-model="form.startCommand" class="w-full font-mono" /></UFormField>
               </div>
               <div class="flex justify-end">
-                <UButton type="submit" icon="i-lucide-save" :loading="saving">Salvar</UButton>
+                <UButton type="submit" icon="i-nucleo-floppy-disk" :loading="saving">Salvar</UButton>
               </div>
             </UForm>
           </UPageCard>
@@ -164,7 +164,7 @@
                 <p class="font-medium text-highlighted">Excluir repositório</p>
                 <p class="text-sm text-muted">Só é possível quando nenhuma instância usa este repositório.</p>
               </div>
-              <UButton color="error" icon="i-lucide-trash-2" @click="deleteOpen = true">Excluir</UButton>
+              <UButton color="error" icon="i-nucleo-trash" @click="deleteOpen = true">Excluir</UButton>
             </div>
           </UPageCard>
         </div>
@@ -176,7 +176,7 @@
         description="Comandos, versões e o código clonado serão apagados."
         action-label="Excluir"
         :confirm-text="slug"
-        icon="i-lucide-trash-2"
+        icon="i-nucleo-trash"
         :action="remove"
       />
     </template>
@@ -198,9 +198,9 @@ useHead({ title: () => `${repository.value?.name ?? 'Repositório'} · DeadByte`
 
 const tab = ref('commands')
 const tabs = computed<TabsItem[]>(() => [
-  { label: 'Comandos', icon: 'i-lucide-terminal-square', value: 'commands', badge: activeCount.value ? { label: String(activeCount.value), color: 'neutral', variant: 'soft' } : undefined },
-  { label: 'Versões', icon: 'i-lucide-history', value: 'versions' },
-  { label: 'Configurações', icon: 'i-lucide-settings-2', value: 'settings' }
+  { label: 'Comandos', icon: 'i-nucleo-console', value: 'commands', badge: activeCount.value ? { label: String(activeCount.value), color: 'neutral', variant: 'soft' } : undefined },
+  { label: 'Versões', icon: 'i-nucleo-history', value: 'versions' },
+  { label: 'Configurações', icon: 'i-nucleo-sliders', value: 'settings' }
 ])
 
 // Sincronização
@@ -215,7 +215,7 @@ async function sync() {
   lastSync.value = null
   try {
     lastSync.value = await apiRequest<SyncResult>(`/api/repositories/${slug.value}/sync-manifest`, { method: 'POST' })
-    useToast().add({ title: 'Repositório sincronizado', color: 'success', icon: 'i-lucide-circle-check' })
+    useToast().add({ title: 'Repositório sincronizado', color: 'success', icon: 'i-nucleo-circle-check' })
   } catch (err) {
     syncError.value = errorMessage(err, 'Falha desconhecida.')
   } finally {

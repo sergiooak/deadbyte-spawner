@@ -1,15 +1,18 @@
 <template>
-  <div class="relative flex min-h-dvh items-center justify-center overflow-hidden bg-default px-4 py-12">
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--ui-color-primary-500)/0.18,transparent_60%)]"
-    />
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--ui-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--ui-border)_1px,transparent_1px)] bg-size-[48px_48px] mask-[radial-gradient(ellipse_at_center,black_20%,transparent_70%)] opacity-60"
-    />
-    <div class="relative w-full max-w-sm">
-      <slot />
+  <div class="grid min-h-dvh bg-default lg:grid-cols-[1.2fr_1fr]">
+    <!-- Hero do brandbook (public/brand/login-hero.png), só em telas grandes -->
+    <div class="relative hidden overflow-hidden border-r border-default lg:block">
+      <img src="/brand/login-hero.png" alt="" class="absolute inset-0 size-full object-cover" />
+      <div aria-hidden="true" class="absolute inset-0 bg-linear-to-r from-transparent via-transparent to-black" />
+      <div aria-hidden="true" class="scanlines absolute inset-0" />
+    </div>
+
+    <div class="relative flex items-center justify-center overflow-hidden px-4 py-12">
+      <div aria-hidden="true" class="grid-backdrop pointer-events-none absolute inset-0" />
+      <div aria-hidden="true" class="scanlines pointer-events-none absolute inset-0" />
+      <div class="relative w-full max-w-sm">
+        <slot />
+      </div>
     </div>
   </div>
 </template>

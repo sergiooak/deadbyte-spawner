@@ -6,7 +6,7 @@
           <UDashboardSidebarCollapse />
         </template>
         <template #right>
-          <UButton icon="i-lucide-plus" @click="createOpen = true">Nova instância</UButton>
+          <UButton icon="i-nucleo-plus" @click="createOpen = true">Nova instância</UButton>
         </template>
       </UDashboardNavbar>
     </template>
@@ -16,16 +16,16 @@
         v-if="session?.bypassed"
         color="warning"
         variant="subtle"
-        icon="i-lucide-shield-alert"
+        icon="i-nucleo-shield-alert"
         title="Painel sem senha"
         description="DEADBYTE_ADMIN_PASSWORD não está definida. Isso só é permitido em desenvolvimento."
       />
 
-      <UPageGrid class="gap-4 sm:gap-6 lg:grid-cols-4 lg:gap-px">
-        <StatCard label="Online" :value="counts.online" icon="i-lucide-radio" :hint="`de ${instances?.length ?? 0}`" to="/instances" />
-        <StatCard label="Aguardando QR" :value="counts.waitingQr" icon="i-lucide-qr-code" to="/instances" />
-        <StatCard label="Com problema" :value="counts.problems" icon="i-lucide-triangle-alert" to="/instances" />
-        <StatCard label="Repositórios" :value="repositories?.length ?? 0" icon="i-lucide-git-branch" to="/repositories" />
+      <UPageGrid class="gap-3 lg:grid-cols-4">
+        <StatCard label="Online" :value="counts.online" highlight icon="i-nucleo-wifi" :hint="`de ${instances?.length ?? 0}`" to="/instances" />
+        <StatCard label="Aguardando QR" :value="counts.waitingQr" icon="i-nucleo-qrcode" to="/instances" />
+        <StatCard label="Com problema" :value="counts.problems" icon="i-nucleo-triangle-warning" to="/instances" />
+        <StatCard label="Repositórios" :value="repositories?.length ?? 0" icon="i-nucleo-code-branch" to="/repositories" />
       </UPageGrid>
 
       <UPageCard v-if="!repositories?.length" variant="subtle" class="overflow-hidden">
@@ -37,7 +37,7 @@
             </div>
             <ol class="space-y-3">
               <li v-for="(step, index) in onboarding" :key="step.title" class="flex gap-3">
-                <span class="grid size-6 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary ring ring-inset ring-primary/25">{{ index + 1 }}</span>
+                <span class="grid size-6 shrink-0 place-items-center bg-primary/10 text-xs font-semibold text-primary ring ring-inset ring-primary/25">{{ index + 1 }}</span>
                 <div>
                   <p class="text-sm font-medium text-highlighted">{{ step.title }}</p>
                   <p class="text-sm text-muted">{{ step.description }}</p>
@@ -45,22 +45,22 @@
               </li>
             </ol>
           </div>
-          <UButton to="/repositories?new=1" size="lg" icon="i-lucide-git-branch">Cadastrar repositório</UButton>
+          <UButton to="/repositories?new=1" size="lg" icon="i-nucleo-code-branch">Cadastrar repositório</UButton>
         </div>
       </UPageCard>
 
       <section class="space-y-3">
         <div class="flex items-center justify-between">
-          <h2 class="font-semibold text-highlighted">Instâncias</h2>
-          <UButton to="/instances" color="neutral" variant="link" trailing-icon="i-lucide-arrow-right" size="sm">Ver todas</UButton>
+          <h2 class="font-pixel text-lg text-highlighted">Instâncias</h2>
+          <UButton to="/instances" color="neutral" variant="link" trailing-icon="i-nucleo-arrow-right" size="sm">Ver todas</UButton>
         </div>
 
+        <BrandIllustration v-if="!instances?.length" name="empty-instances" />
         <UEmpty
           v-if="!instances?.length"
-          icon="i-lucide-bot"
           title="Nenhuma instância"
           description="Crie uma instância para conectar um número de WhatsApp."
-          :actions="[{ label: 'Nova instância', icon: 'i-lucide-plus', onClick: () => { createOpen = true } }]"
+          :actions="[{ label: 'Nova instância', icon: 'i-nucleo-plus', onClick: () => { createOpen = true } }]"
           variant="subtle"
         />
 

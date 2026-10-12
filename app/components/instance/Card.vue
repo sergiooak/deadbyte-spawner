@@ -19,7 +19,7 @@
       <div class="flex items-center justify-between gap-2">
         <UTooltip :text="instance.autoStart ? 'Volta sozinha após reinício do servidor' : 'Não inicia sozinha'">
           <span class="flex items-center gap-1.5 text-xs text-muted">
-            <UIcon :name="instance.autoStart ? 'i-lucide-repeat' : 'i-lucide-hand'" class="size-3.5" />
+            <UIcon :name="instance.autoStart ? 'i-nucleo-repeat' : 'i-nucleo-hand'" class="size-3.5" />
             {{ instance.autoStart ? 'Auto-start' : 'Manual' }}
           </span>
         </UTooltip>

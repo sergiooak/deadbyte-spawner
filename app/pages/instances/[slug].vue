@@ -7,7 +7,7 @@
         </template>
         <template #title>
           <div class="flex min-w-0 items-center gap-3">
-            <UButton to="/instances" icon="i-lucide-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Voltar" />
+            <UButton to="/instances" icon="i-nucleo-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Voltar" />
             <span class="truncate">{{ instance?.name ?? slug }}</span>
             <StatusBadge v-if="instance" :status="instance.status" size="sm" />
           </div>
@@ -25,7 +25,7 @@
     <template #body>
       <UEmpty
         v-if="error?.statusCode === 404"
-        icon="i-lucide-search-x"
+        icon="i-nucleo-magnifier-alert"
         title="Instância não encontrada"
         :actions="[{ label: 'Voltar para instâncias', to: '/instances' }]"
       />
@@ -35,7 +35,7 @@
           v-if="instance.status === 'crashed' || instance.status === 'error'"
           color="error"
           variant="subtle"
-          icon="i-lucide-skull"
+          icon="i-nucleo-skull"
           title="O bot parou com erro"
           description="Veja a aba Logs para entender o que aconteceu."
           :actions="[{ label: 'Ver logs', color: 'error', variant: 'outline', onClick: () => { tab = 'logs' } }]"
@@ -58,8 +58,8 @@
             <UCard>
               <template #header>
                 <div class="flex items-center justify-between">
-                  <h3 class="font-semibold text-highlighted">Atividade recente</h3>
-                  <UButton color="neutral" variant="link" size="sm" trailing-icon="i-lucide-arrow-right" @click="tab = 'events'">Todos os eventos</UButton>
+                  <h3 class="font-pixel text-lg text-highlighted">Atividade recente</h3>
+                  <UButton color="neutral" variant="link" size="sm" trailing-icon="i-nucleo-arrow-right" @click="tab = 'events'">Todos os eventos</UButton>
                 </div>
               </template>
               <EventTimeline :events="(events ?? []).slice(0, 6)" />
@@ -99,7 +99,7 @@
                 description="Depois de um deploy ou reinício do container, o bot sobe sozinho e reconecta a sessão salva."
               />
               <div class="flex justify-end">
-                <UButton type="submit" icon="i-lucide-save" :loading="savingSettings">Salvar</UButton>
+                <UButton type="submit" icon="i-nucleo-floppy-disk" :loading="savingSettings">Salvar</UButton>
               </div>
             </UForm>
           </UPageCard>
@@ -113,7 +113,7 @@
                 <UTextarea v-model="message.text" :rows="3" autoresize class="w-full" />
               </UFormField>
               <div class="flex justify-end">
-                <UButton type="submit" icon="i-lucide-send" :loading="sending" :disabled="instance.status !== 'ready' || !message.chatId || !message.text">Enviar</UButton>
+                <UButton type="submit" icon="i-nucleo-paper-plane-2" :loading="sending" :disabled="instance.status !== 'ready' || !message.chatId || !message.text">Enviar</UButton>
               </div>
             </UForm>
           </UPageCard>
@@ -125,14 +125,14 @@
                   <p class="font-medium text-highlighted">Desconectar WhatsApp</p>
                   <p class="text-sm text-muted">Para o bot e apaga a sessão salva. Vai precisar escanear o QR de novo.</p>
                 </div>
-                <UButton color="warning" variant="soft" icon="i-lucide-unplug" @click="clearSessionOpen = true">Limpar sessão</UButton>
+                <UButton color="warning" variant="soft" icon="i-nucleo-link-broken" @click="clearSessionOpen = true">Limpar sessão</UButton>
               </div>
               <div class="flex flex-wrap items-center justify-between gap-3 pt-4">
                 <div>
                   <p class="font-medium text-highlighted">Excluir instância</p>
                   <p class="text-sm text-muted">Remove a instância, logs, eventos e sessão. Não dá para desfazer.</p>
                 </div>
-                <UButton color="error" icon="i-lucide-trash-2" @click="deleteOpen = true">Excluir</UButton>
+                <UButton color="error" icon="i-nucleo-trash" @click="deleteOpen = true">Excluir</UButton>
               </div>
             </div>
           </UPageCard>
@@ -145,7 +145,7 @@
         description="O bot será parado e desconectado. Para voltar, inicie e escaneie o QR."
         action-label="Limpar sessão"
         color="warning"
-        icon="i-lucide-unplug"
+        icon="i-nucleo-link-broken"
         :action="clearSession"
       />
       <ConfirmModal
@@ -154,7 +154,7 @@
         description="Logs, eventos, configuração de comandos e sessão serão apagados."
         action-label="Excluir para sempre"
         :confirm-text="slug"
-        icon="i-lucide-trash-2"
+        icon="i-nucleo-trash"
         :action="deleteInstance"
       />
     </template>
@@ -185,11 +185,11 @@ const liveLogs = ref(true)
 const enabledCommands = computed(() => (commands.value ?? []).filter((item) => item.enabled).length)
 
 const tabs = computed<TabsItem[]>(() => [
-  { label: 'Visão geral', icon: 'i-lucide-gauge', value: 'overview' },
-  { label: 'Comandos', icon: 'i-lucide-terminal-square', value: 'commands', badge: commands.value?.length ? { label: String(enabledCommands.value), color: 'neutral', variant: 'soft' } : undefined },
-  { label: 'Logs', icon: 'i-lucide-scroll-text', value: 'logs' },
-  { label: 'Eventos', icon: 'i-lucide-activity', value: 'events' },
-  { label: 'Configurações', icon: 'i-lucide-settings-2', value: 'settings' }
+  { label: 'Visão geral', icon: 'i-nucleo-gauge', value: 'overview' },
+  { label: 'Comandos', icon: 'i-nucleo-console', value: 'commands', badge: commands.value?.length ? { label: String(enabledCommands.value), color: 'neutral', variant: 'soft' } : undefined },
+  { label: 'Logs', icon: 'i-nucleo-scroll', value: 'logs' },
+  { label: 'Eventos', icon: 'i-nucleo-heartbeat', value: 'events' },
+  { label: 'Configurações', icon: 'i-nucleo-sliders', value: 'settings' }
 ])
 
 async function refreshAll() {

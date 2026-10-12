@@ -8,15 +8,15 @@
       :default-size="15"
       :min-size="13"
       :max-size="20"
-      class="bg-elevated/25"
-      :ui="{ footer: 'lg:border-t lg:border-default' }"
+      class="bg-black"
+      :ui="{ footer: 'lg:border-t lg:border-default', header: 'border-b border-default' }"
     >
       <template #header="{ collapsed }">
         <NuxtLink to="/" class="flex min-w-0 items-center gap-2.5" :class="collapsed ? 'mx-auto' : 'px-1'">
-          <AppLogo class="size-8 shrink-0" />
-          <div v-if="!collapsed" class="min-w-0 leading-tight">
-            <p class="truncate text-sm font-semibold text-highlighted">DeadByte</p>
-            <p class="truncate text-xs text-muted">Spawner</p>
+          <AppLogo class="size-7 shrink-0" />
+          <div v-if="!collapsed" class="min-w-0 leading-none">
+            <p class="truncate font-pixel text-base neon-text">DeadByte</p>
+            <p class="mt-1 truncate font-mono text-[10px] tracking-[0.3em] text-muted uppercase">Spawner</p>
           </div>
         </NuxtLink>
       </template>
@@ -37,7 +37,7 @@
         <div class="flex w-full items-center gap-1" :class="collapsed ? 'flex-col' : ''">
           <UTooltip v-if="!session?.bypassed" text="Sair">
             <UButton
-              icon="i-lucide-log-out"
+              icon="i-nucleo-exit-door"
               color="neutral"
               variant="ghost"
               aria-label="Sair"
@@ -65,14 +65,14 @@ watch(() => route.fullPath, () => {
 })
 
 const navigation = computed<NavigationMenuItem[]>(() => [
-  { label: 'Visão geral', icon: 'i-lucide-layout-dashboard', to: '/', exact: true },
-  { label: 'Instâncias', icon: 'i-lucide-bot', to: '/instances' },
-  { label: 'Repositórios', icon: 'i-lucide-git-branch', to: '/repositories' },
-  { label: 'Logs', icon: 'i-lucide-scroll-text', to: '/logs' }
+  { label: 'Visão geral', icon: 'i-nucleo-grid-layout', to: '/', exact: true },
+  { label: 'Instâncias', icon: 'i-nucleo-robot', to: '/instances' },
+  { label: 'Repositórios', icon: 'i-nucleo-code-branch', to: '/repositories' },
+  { label: 'Logs', icon: 'i-nucleo-scroll', to: '/logs' }
 ])
 
 const secondary: NavigationMenuItem[] = [
-  { label: 'Configurações', icon: 'i-lucide-settings', to: '/settings' },
+  { label: 'Configurações', icon: 'i-nucleo-gear', to: '/settings' },
   { label: 'GitHub', icon: 'i-simple-icons-github', to: 'https://github.com/sergiooak/deadbyte-bot', target: '_blank' }
 ]
 </script>

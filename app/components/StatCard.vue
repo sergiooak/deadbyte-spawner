@@ -1,12 +1,19 @@
 <template>
-  <UPageCard :to="to" variant="subtle" :ui="{ container: 'gap-y-1.5', wrapper: 'items-start', leading: 'p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25 flex-col', title: 'font-normal text-muted text-xs uppercase tracking-wide' }" :icon="icon" :title="label" class="lg:rounded-none first:rounded-l-lg last:rounded-r-lg hover:z-1">
+  <UPageCard
+    :to="to"
+    variant="outline"
+    :ui="{ container: 'gap-y-2', wrapper: 'items-start', leading: 'p-2 bg-primary/10 ring ring-inset ring-primary/40 text-primary flex-col', title: 'font-mono font-normal text-muted text-[11px] uppercase tracking-[0.2em]' }"
+    :icon="icon"
+    :title="label"
+    class="bg-black hover:z-1 hover:ring-primary/60"
+  >
     <div class="flex items-baseline gap-2">
-      <span class="text-2xl font-semibold text-highlighted tabular-nums">{{ value }}</span>
-      <span v-if="hint" class="text-xs text-muted">{{ hint }}</span>
+      <span class="font-pixel text-3xl tabular-nums" :class="highlight ? 'neon-text' : 'text-highlighted'">{{ value }}</span>
+      <span v-if="hint" class="font-mono text-xs text-muted">{{ hint }}</span>
     </div>
   </UPageCard>
 </template>
 
 <script setup lang="ts">
-defineProps<{ label: string; value: string | number; icon: string; hint?: string; to?: string }>()
+defineProps<{ label: string; value: string | number; icon: string; hint?: string; to?: string; highlight?: boolean }>()
 </script>

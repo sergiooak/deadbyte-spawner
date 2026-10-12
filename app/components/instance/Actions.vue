@@ -2,7 +2,7 @@
   <div class="flex items-center gap-1.5">
     <template v-if="running">
       <UButton
-        icon="i-lucide-rotate-cw"
+        icon="i-nucleo-arrow-rotate-clockwise"
         color="neutral"
         variant="outline"
         :size="size"
@@ -13,7 +13,7 @@
         <span :class="compact ? 'sr-only' : 'max-sm:sr-only'">Reiniciar</span>
       </UButton>
       <UButton
-        icon="i-lucide-square"
+        icon="i-nucleo-media-stop"
         color="error"
         variant="soft"
         :size="size"
@@ -26,7 +26,7 @@
     </template>
     <UButton
       v-else
-      icon="i-lucide-play"
+      icon="i-nucleo-media-play"
       color="primary"
       :size="size"
       :loading="busy === 'start'"

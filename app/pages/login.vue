@@ -1,19 +1,19 @@
 <template>
   <div class="space-y-6">
     <div class="flex flex-col items-center gap-3 text-center">
-      <AppLogo class="size-12 drop-shadow-lg" />
+      <AppLogo class="size-14" />
       <div>
-        <h1 class="text-xl font-semibold text-highlighted">DeadByte Spawner</h1>
-        <p class="text-sm text-muted">Entre para gerenciar seus bots</p>
+        <h1 class="font-pixel text-3xl neon-text">DeadByte</h1>
+        <p class="mt-2 font-mono text-xs tracking-[0.3em] text-muted uppercase">Spawner · acesso restrito</p>
       </div>
     </div>
 
-    <UCard :ui="{ body: 'p-5 sm:p-6' }" class="shadow-xl shadow-black/5">
+    <UCard :ui="{ body: 'p-5 sm:p-6' }" class="bg-black ring-primary/40 shadow-[0_0_40px_-12px_var(--ui-primary)]">
       <UAlert
         v-if="session?.problem"
         color="warning"
         variant="subtle"
-        icon="i-lucide-lock"
+        icon="i-nucleo-lock"
         title="Painel bloqueado"
         :description="`${session.problem} Configure a variável de ambiente na Coolify e reinicie.`"
         class="mb-5"
@@ -25,7 +25,7 @@
             v-model="state.password"
             :type="showPassword ? 'text' : 'password'"
             placeholder="••••••••••••••••"
-            icon="i-lucide-key-round"
+            icon="i-nucleo-key"
             autocomplete="current-password"
             autofocus
             size="lg"
@@ -38,7 +38,7 @@
                 color="neutral"
                 variant="link"
                 size="sm"
-                :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                :icon="showPassword ? 'i-nucleo-eye-slash' : 'i-nucleo-eye'"
                 :aria-label="showPassword ? 'Esconder senha' : 'Mostrar senha'"
                 @click="showPassword = !showPassword"
               />
@@ -46,15 +46,15 @@
           </UInput>
         </UFormField>
 
-        <UAlert v-if="error" color="error" variant="soft" icon="i-lucide-circle-x" :description="error" />
+        <UAlert v-if="error" color="error" variant="soft" icon="i-nucleo-circle-xmark" :description="error" />
 
-        <UButton type="submit" block size="lg" :loading="loading" :disabled="!!session?.problem" trailing-icon="i-lucide-arrow-right">
+        <UButton type="submit" block size="lg" :loading="loading" :disabled="!!session?.problem" trailing-icon="i-nucleo-arrow-right">
           Entrar
         </UButton>
       </UForm>
     </UCard>
 
-    <p class="text-center text-xs text-dimmed">Sessão protegida por cookie criptografado · expira em 7 dias</p>
+    <p class="text-center font-mono text-[11px] text-dimmed">sessão criptografada · expira em 7 dias</p>
   </div>
 </template>
 

@@ -3,10 +3,10 @@
     <template #body>
       <UEmpty
         v-if="!repositories?.length"
-        icon="i-lucide-git-branch"
+        icon="i-nucleo-code-branch"
         title="Cadastre um repositório primeiro"
         description="A instância roda o código de um repositório sincronizado."
-        :actions="[{ label: 'Novo repositório', to: '/repositories?new=1', icon: 'i-lucide-plus' }]"
+        :actions="[{ label: 'Novo repositório', to: '/repositories?new=1', icon: 'i-nucleo-plus' }]"
         variant="naked"
       />
       <UForm v-else id="create-instance" :schema="schema" :state="state" class="space-y-4" @submit="submit">
@@ -33,7 +33,7 @@
 
     <template #footer>
       <UButton color="neutral" variant="ghost" @click="open = false">Cancelar</UButton>
-      <UButton v-if="repositories?.length" type="submit" form="create-instance" icon="i-lucide-plus" :loading="loading">Criar instância</UButton>
+      <UButton v-if="repositories?.length" type="submit" form="create-instance" icon="i-nucleo-plus" :loading="loading">Criar instância</UButton>
     </template>
   </UModal>
 </template>

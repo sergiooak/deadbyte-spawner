@@ -1,8 +1,8 @@
 <template>
   <UBadge :color="meta.color" variant="subtle" :size="size" class="gap-1.5 font-medium">
     <span class="relative flex size-2">
-      <span v-if="meta.live" class="absolute inline-flex size-full animate-ping rounded-full bg-current opacity-60" />
-      <span class="relative inline-flex size-2 rounded-full bg-current" />
+      <span v-if="meta.live" class="absolute inline-flex size-full animate-ping bg-current opacity-60" />
+      <span class="relative inline-flex size-2 bg-current" :class="meta.live ? 'neon-dot' : ''" />
     </span>
     {{ meta.label }}
   </UBadge>

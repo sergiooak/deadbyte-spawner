@@ -6,13 +6,13 @@
           <UDashboardSidebarCollapse />
         </template>
         <template #right>
-          <UButton icon="i-lucide-plus" @click="createOpen = true">Nova instância</UButton>
+          <UButton icon="i-nucleo-plus" @click="createOpen = true">Nova instância</UButton>
         </template>
       </UDashboardNavbar>
 
       <UDashboardToolbar>
         <template #left>
-          <UInput v-model="search" icon="i-lucide-search" placeholder="Buscar instância…" class="w-full sm:w-64" />
+          <UInput v-model="search" icon="i-nucleo-magnifier" placeholder="Buscar instância…" class="w-full sm:w-64" />
         </template>
         <template #right>
           <UTabs v-model="statusFilter" :items="statusTabs" :content="false" size="xs" variant="pill" />
@@ -54,7 +54,7 @@
         </template>
         <template #empty>
           <UEmpty
-            icon="i-lucide-bot"
+            icon="i-nucleo-robot"
             :title="instances?.length ? 'Nada encontrado' : 'Nenhuma instância'"
             :description="instances?.length ? 'Ajuste a busca ou o filtro.' : 'Crie uma instância para conectar um número de WhatsApp.'"
             variant="naked"

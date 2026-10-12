@@ -74,10 +74,14 @@
               <UTextarea v-model="message.text" :rows="4" autoresize placeholder="Escreva como o bot… *negrito*, _itálico_ e ~riscado~ funcionam" class="w-full" @keydown.ctrl.enter="send" />
             </UFormField>
             <div class="flex flex-wrap items-center gap-3">
-              <UButton color="neutral" variant="outline" icon="i-nucleo-image" @click="fileInput?.click()">{{ attachment ? attachment.filename : 'Anexar arquivo' }}</UButton>
-              <UButton v-if="attachment" color="neutral" variant="ghost" icon="i-nucleo-xmark" aria-label="Remover anexo" @click="attachment = null" />
-              <USwitch v-if="selected.isGroup" v-model="message.mentionAll" label="Mencionar todos" />
-              <UButton type="submit" icon="i-nucleo-paper-plane-2" class="ms-auto" :loading="sending" :disabled="!message.text.trim() && !attachment">Enviar</UButton>
+              <USelect v-model="message.mode" :items="sendModes" class="w-40" aria-label="Enviar como" />
+              <template v-if="message.mode === 'text'">
+                <UButton color="neutral" variant="outline" icon="i-nucleo-image" @click="fileInput?.click()">{{ attachment ? attachment.filename : 'Anexar arquivo' }}</UButton>
+                <UButton v-if="attachment" color="neutral" variant="ghost" icon="i-nucleo-xmark" aria-label="Remover anexo" @click="attachment = null" />
+                <USwitch v-if="selected.isGroup" v-model="message.mentionAll" label="Mencionar todos" />
+              </template>
+              <p v-else class="font-mono text-xs text-muted">O texto vira figurinha, como no !{{ message.mode }}.</p>
+              <UButton type="submit" icon="i-nucleo-paper-plane-2" class="ms-auto" :loading="sending" :disabled="message.mode === 'text' ? !message.text.trim() && !attachment : !message.text.trim()">Enviar</UButton>
             </div>
             <input ref="fileInput" type="file" class="hidden" @change="onFile" />
           </UForm>
@@ -205,7 +209,15 @@ function maskUser(user: string) {
 }
 
 // Envio
-const message = reactive({ text: '', mentionAll: false })
+type SendMode = 'text' | 'ttp' | 'ttp2' | 'ttp3'
+const sendModes: Array<{ label: string; value: SendMode }> = [
+  { label: 'Texto / arquivo', value: 'text' },
+  { label: 'Figurinha TTP', value: 'ttp' },
+  { label: 'Figurinha TTP 2', value: 'ttp2' },
+  { label: 'Figurinha TTP 3', value: 'ttp3' }
+]
+const TTP_STYLES: Record<Exclude<SendMode, 'text'>, 1 | 2 | 3> = { ttp: 1, ttp2: 2, ttp3: 3 }
+const message = reactive<{ text: string; mentionAll: boolean; mode: SendMode }>({ text: '', mentionAll: false, mode: 'text' })
 const attachment = ref<{ base64: string; mimeType: string; filename: string } | null>(null)
 const fileInput = ref<HTMLInputElement>()
 const sending = ref(false)
@@ -227,15 +239,15 @@ async function onFile(event: Event) {
 }
 
 async function send() {
-  if (!selected.value || (!message.text.trim() && !attachment.value)) return
+  const asTtp = message.mode !== 'text'
+  if (!selected.value || (!message.text.trim() && (asTtp || !attachment.value))) return
   sending.value = true
+  const body = asTtp
+    ? { text: message.text.trim(), ttpStyle: TTP_STYLES[message.mode as Exclude<SendMode, 'text'>] }
+    : { text: message.text || undefined, media: attachment.value ?? undefined, mentionAll: message.mentionAll || undefined }
   const result = await withToast(
-    () =>
-      apiRequest(`${chatUrl(selected.value!.id)}/messages`, {
-        method: 'POST',
-        body: { text: message.text || undefined, media: attachment.value ?? undefined, mentionAll: message.mentionAll || undefined }
-      }),
-    { success: 'Mensagem enviada', error: 'Não foi possível enviar' }
+    () => apiRequest(`${chatUrl(selected.value!.id)}/messages`, { method: 'POST', body }),
+    { success: asTtp ? 'Figurinha enviada' : 'Mensagem enviada', error: 'Não foi possível enviar' }
   )
   sending.value = false
   if (result) {

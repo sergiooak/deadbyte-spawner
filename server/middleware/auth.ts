@@ -1,5 +1,5 @@
 import { createError, defineEventHandler, getRequestHeader, getRequestHost, getRequestIP, getRequestURL, setResponseHeaders } from 'h3'
-import { adminPasswordProblem, isAuthBypassed, isAuthenticated } from '../utils/auth.js'
+import { adminPasswordProblem, hasValidLogsToken, isAuthBypassed, isAuthenticated } from '../utils/auth.js'
 import { ensureBootstrapped } from '../utils/bootstrap.js'
 
 const PUBLIC_API_PATHS = new Set(['/api/health', '/api/auth/login', '/api/auth/logout', '/api/auth/session'])
@@ -50,6 +50,11 @@ export default defineEventHandler(async (event) => {
     if (!LOOPBACK.has(ip)) {
       throw createError({ statusCode: 403, statusMessage: 'Internal endpoint.' })
     }
+    return
+  }
+
+  // Logs também aceitam o token só leitura de DEADBYTE_LOGS_TOKEN.
+  if (pathname.startsWith('/api/logs') && event.method === 'GET' && hasValidLogsToken(event)) {
     return
   }
 

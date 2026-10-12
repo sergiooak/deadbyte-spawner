@@ -11,6 +11,8 @@ services:
       - SERVICE_FQDN_SPAWNER_3000
       - DATABASE_URL=postgres://deadbyte:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/deadbyte
       - DEADBYTE_ADMIN_PASSWORD=${SERVICE_PASSWORD_64_ADMIN}
+      # Token só leitura da API de logs (/api/logs), para revisões automáticas.
+      - DEADBYTE_LOGS_TOKEN=${SERVICE_PASSWORD_64_LOGS}
       - DEADBYTE_BOT_DEFAULT_REPOSITORY_URL=${DEADBYTE_BOT_DEFAULT_REPOSITORY_URL:-https://github.com/sergiooak/deadbyte-bot.git}
       - DEADBYTE_BOT_DEFAULT_BRANCH=${DEADBYTE_BOT_DEFAULT_BRANCH:-main}
       - DEADBYTE_REMBG_URL=http://rembg:7000
@@ -24,6 +26,8 @@ services:
       - deadbyte-data:/data
     # Chromium precisa de /dev/shm maior que o padrão de 64MB.
     shm_size: 1gb
+    # Tempo para os bots fecharem o Chromium e gravarem a sessão no volume antes do container sair.
+    stop_grace_period: 60s
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto'
-import { getRequestProtocol, useSession, type H3Event } from 'h3'
+import { getRequestHeader, getRequestProtocol, useSession, type H3Event } from 'h3'
 
 export type AdminSessionData = {
   authenticated?: boolean
@@ -102,4 +102,16 @@ export async function isAuthenticated(event: H3Event): Promise<boolean> {
   }
   const session = await useAdminSession(event)
   return session.data.authenticated === true
+}
+
+/**
+ * Token só leitura para a API de logs (/api/logs/*), usado por revisões automáticas (ex.: Claude Code).
+ * Não dá acesso a nenhuma outra rota. Exige 32+ caracteres.
+ */
+export function hasValidLogsToken(event: H3Event): boolean {
+  const expected = process.env.DEADBYTE_LOGS_TOKEN?.trim() ?? ''
+  if (expected.length < 32) return false
+  const header = getRequestHeader(event, 'authorization') ?? ''
+  const received = header.startsWith('Bearer ') ? header.slice(7).trim() : ''
+  return received.length > 0 && timingSafeEqual(sha256(received), sha256(expected))
 }

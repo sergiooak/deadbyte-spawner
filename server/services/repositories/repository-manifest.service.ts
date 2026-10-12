@@ -11,6 +11,28 @@ export type LoadedRepositoryManifest = {
   rawStdout: string
 }
 
+const OUTPUT_TAIL_LINES = 20
+
+/**
+ * Roda o comando mostrando a saída nos logs do container e, se falhar, põe o fim da saída na
+ * mensagem do erro: é ela que aparece no card de sincronização do painel.
+ */
+async function runVisible(command: string, cwd: string, env: Record<string, string> = {}): Promise<void> {
+  const result = await execaCommand(command, {
+    cwd,
+    shell: true,
+    stdout: ['pipe', 'inherit'],
+    stderr: ['pipe', 'inherit'],
+    all: true,
+    reject: false,
+    env: { ...process.env, ...env }
+  })
+  if (result.failed) {
+    const tail = String(result.all ?? '').split('\n').map((line) => line.trimEnd()).filter(Boolean).slice(-OUTPUT_TAIL_LINES).join('\n')
+    throw new Error(tail ? `${result.shortMessage}\n\n${tail}` : result.shortMessage)
+  }
+}
+
 export class RepositoryManifestService {
   /**
    * Creates a pnpm-workspace.yaml in the repository directory if one doesn't exist.
@@ -72,17 +94,11 @@ export class RepositoryManifestService {
   async install(cwd: string, command: string): Promise<void> {
     await this.ensureIsolatedWorkspace(cwd)
     await this.patchFileDependencies(cwd)
-    await execaCommand(`${command} --dangerously-allow-all-builds`, {
-      cwd,
-      shell: true,
-      stderr: 'inherit',
-      stdout: 'inherit',
-      env: { ...process.env, npm_config_dangerously_allow_all_builds: 'true' }
-    })
+    await runVisible(`${command} --dangerously-allow-all-builds`, cwd, { npm_config_dangerously_allow_all_builds: 'true' })
   }
 
   async build(cwd: string, command: string): Promise<void> {
-    await execaCommand(command, { cwd, shell: true, stderr: 'inherit', stdout: 'inherit' })
+    await runVisible(command, cwd)
   }
 
   async load(cwd: string, command: string): Promise<LoadedRepositoryManifest> {

@@ -1,7 +1,7 @@
-# Stack completa do DeadByte: painel/spawner + PostgreSQL + rembg.
+# Stack do DeadByte com banco externo: painel/spawner + rembg, usando um PostgreSQL que já existe (DATABASE_URL).
 # Na Coolify: New Resource → Docker Compose (build pack "Docker Compose") apontando para este repo.
 # As variáveis SERVICE_* são geradas pela Coolify automaticamente.
-# Localmente: crie um .env com SERVICE_PASSWORD_POSTGRES e SERVICE_PASSWORD_64_ADMIN (16+ caracteres) e rode `docker compose up --build`.
+# Para subir um PostgreSQL próprio junto, use docker-compose.postgres.yml.
 
 services:
   spawner:
@@ -9,7 +9,8 @@ services:
     restart: unless-stopped
     environment:
       - SERVICE_FQDN_SPAWNER_3000
-      - DATABASE_URL=postgres://deadbyte:${SERVICE_PASSWORD_POSTGRES}@postgres:5432/deadbyte
+      # Banco existente, ex.: postgres://deadbyte_spawner:SENHA@<host interno>:5432/deadbyte_spawner
+      - DATABASE_URL=${DATABASE_URL:?}
       - DEADBYTE_ADMIN_PASSWORD=${SERVICE_PASSWORD_64_ADMIN}
       # Token só leitura da API de logs (/api/logs), para revisões automáticas.
       - DEADBYTE_LOGS_TOKEN=${SERVICE_PASSWORD_64_LOGS}
@@ -28,30 +29,12 @@ services:
     shm_size: 1gb
     # Tempo para os bots fecharem o Chromium e gravarem a sessão no volume antes do container sair.
     stop_grace_period: 60s
-    depends_on:
-      postgres:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 40s
-
-  postgres:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=deadbyte
-      - POSTGRES_PASSWORD=${SERVICE_PASSWORD_POSTGRES}
-      - POSTGRES_DB=deadbyte
-    volumes:
-      - deadbyte-postgres:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U deadbyte -d deadbyte"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
 
   # Remoção de fundo do comando .bg. Opcional: pode remover se não usar (economiza ~1GB de RAM).
   rembg:
@@ -63,5 +46,4 @@ services:
 
 volumes:
   deadbyte-data:
-  deadbyte-postgres:
   deadbyte-rembg-models:

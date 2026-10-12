@@ -14,23 +14,36 @@ O spawner não contém lógica de comandos. Ele só configura comandos que exist
 
 ## Deploy na Coolify
 
-O repositório traz `Dockerfile` e `docker-compose.yml` prontos. A stack sobe três serviços:
+O repositório traz `Dockerfile` e dois compose prontos:
 
-| Serviço | Função |
-| --- | --- |
-| `spawner` | Painel + bots (Node 24, Chromium, FFmpeg, git, pnpm) |
-| `postgres` | Banco do painel (PostgreSQL 17) |
-| `rembg` | Remoção de fundo do comando `.bg` (opcional) |
+| Arquivo | Serviços | Quando usar |
+| --- | --- | --- |
+| `docker-compose.yml` | `spawner`, `rembg` | Já existe um PostgreSQL (ex.: um banco gerenciado pela Coolify). Exige `DATABASE_URL`. |
+| `docker-compose.postgres.yml` | `spawner`, `postgres`, `rembg` | Stack isolada com PostgreSQL 17 próprio. |
+
+O `spawner` é o painel + bots (Node 24, Chromium, FFmpeg, git, pnpm); o `rembg` faz a remoção de fundo do comando `.bg` (opcional).
+
+### Banco existente
+
+O spawner cria as próprias tabelas no schema `public` (migrations no boot). Use um banco só para ele dentro do PostgreSQL existente:
+
+```sql
+CREATE USER deadbyte_spawner WITH PASSWORD '<senha>';
+CREATE DATABASE deadbyte_spawner OWNER deadbyte_spawner;
+```
+
+Na Coolify, o spawner precisa enxergar o banco pela rede interna: suba os dois no mesmo servidor, ative **Connect To Predefined Network** nas configurações avançadas do recurso do spawner e use o host interno do banco (o nome do container, mostrado na URL interna da página do banco) na `DATABASE_URL`.
 
 ### Passo a passo
 
 1. Na Coolify, crie um recurso: **+ New → Public Repository** (ou Private com a GitHub App), aponte para `sergiooak/deadbyte-spawner`, branch `main`.
-2. Em **Build Pack**, escolha **Docker Compose** (arquivo `/docker-compose.yml`).
+2. Em **Build Pack**, escolha **Docker Compose** e o arquivo: `/docker-compose.yml` (banco existente) ou `/docker-compose.postgres.yml` (banco próprio).
 3. Em **Domains**, defina o domínio do serviço `spawner` com a porta interna no fim, por exemplo `https://deadbyte.seudominio.com:3000`. O acesso externo fica em 443 com HTTPS (o painel e o WebSocket `/_ws` passam pelo mesmo domínio).
 4. Em **Environment Variables**:
    - `SERVICE_PASSWORD_64_ADMIN`: senha do painel, gerada pela Coolify. Copie para entrar ou troque por uma sua (16+ caracteres).
    - `SERVICE_PASSWORD_64_LOGS`: token só leitura da API de logs (`DEADBYTE_LOGS_TOKEN`), gerado pela Coolify.
-   - `SERVICE_PASSWORD_POSTGRES`: gerada pela Coolify. Não mexa depois do primeiro deploy (o banco já foi criado com ela).
+   - `DATABASE_URL` (com banco existente): `postgres://deadbyte_spawner:<senha>@<host interno>:5432/deadbyte_spawner`.
+   - `SERVICE_PASSWORD_POSTGRES` (com banco próprio): gerada pela Coolify. Não mexa depois do primeiro deploy (o banco já foi criado com ela).
    - `DEADBYTE_TTP_API_KEY`: necessária para o `!ttp`. Sem ela o comando responde erro e o log explica o motivo.
    - Opcionais: `DEADBYTE_TEXAS_API_KEY` (bíblia, música, emoji), `DEADBYTE_TYPESAFE_API_KEY` e `DEADBYTE_OPENAI_API_KEY` (Jev).
 5. Clique em **Deploy**. O primeiro build leva alguns minutos. Acompanhe em **Logs**: o boot aparece como um evento `spawner.boot`.
@@ -162,7 +175,7 @@ node .output/server/index.mjs
 Crie um `.env` com `SERVICE_PASSWORD_POSTGRES` e `SERVICE_PASSWORD_64_ADMIN` e rode:
 
 ```bash
-docker compose up --build
+docker compose -f docker-compose.postgres.yml up --build
 ```
 
 ## API

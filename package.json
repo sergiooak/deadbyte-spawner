@@ -17,7 +17,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@deadbyte/runtime": "file:../deadbyte-runtime",
+    "@deadbyte/runtime": "^4.0.1",
     "@nuxt/ui": "^4.8.1",
     "consola": "^3.4.2",
     "defu": "^6.1.7",
@@ -36,6 +36,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@iconify-json/lucide": "^1.2.142",
+    "@iconify-json/simple-icons": "^1.2.99",
     "@types/node": "^25.9.1",
     "@types/qrcode": "^1.5.6",
     "drizzle-kit": "^0.31.10",

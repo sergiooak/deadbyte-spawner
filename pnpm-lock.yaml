@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@deadbyte/runtime':
-        specifier: file:../deadbyte-runtime
-        version: file:../deadbyte-runtime
+        specifier: ^4.0.1
+        version: 4.0.1
       '@nuxt/ui':
         specifier: ^4.8.1
         version: 4.8.1(@internationalized/date@3.12.2)(@internationalized/number@3.6.7)(@tiptap/extensions@3.23.6(@tiptap/core@3.23.6(@tiptap/pm@3.23.6))(@tiptap/pm@3.23.6))(@tiptap/y-tiptap@3.0.4(prosemirror-model@1.25.7)(prosemirror-state@1.4.4)(prosemirror-view@1.41.8)(y-protocols@1.0.7(yjs@13.6.31))(yjs@13.6.31))(db0@0.3.4(drizzle-orm@0.45.2(postgres@3.4.9)))(embla-carousel@8.6.0)(ioredis@5.11.0)(magicast@0.5.3)(qrcode@1.5.4)(tailwindcss@4.3.0)(typescript@6.0.3)(vite@7.3.3(@types/node@25.9.1)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.22.3)(yaml@2.9.0))(vue-router@5.1.0(@vue/compiler-sfc@3.5.35)(vite@7.3.3(@types/node@25.9.1)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.48.0)(tsx@4.22.3)(yaml@2.9.0))(vue@3.5.35(typescript@6.0.3)))(vue@3.5.35(typescript@6.0.3))(yjs@13.6.31)(zod@4.4.3)
@@ -60,6 +60,12 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@iconify-json/lucide':
+        specifier: ^1.2.142
+        version: 1.2.142
+      '@iconify-json/simple-icons':
+        specifier: ^1.2.99
+        version: 1.2.99
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.1
@@ -263,8 +269,8 @@ packages:
   '@colordx/core@5.4.3':
     resolution: {integrity: sha512-kIxYSfA5T8HXjav55UaaH/o/cKivF6jCCGIb8eqtcsfI46wsvlSiT8jMDyrl779qLec3c2c2oHBZo4oAhvbjrQ==}
 
-  '@deadbyte/runtime@file:../deadbyte-runtime':
-    resolution: {directory: ../deadbyte-runtime, type: directory}
+  '@deadbyte/runtime@4.0.1':
+    resolution: {integrity: sha512-jgfPFXBL/Aj2GKbnI5lD8DT8YDe6jPIs5JGnDNR+hrRN6vyy0WW4xjKmLH+WRbysttCepq1zE/eJgG+oBPgAwQ==}
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
@@ -958,6 +964,12 @@ packages:
   '@humanwhocodes/retry@0.4.3':
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
+
+  '@iconify-json/lucide@1.2.142':
+    resolution: {integrity: sha512-vEGX5X52/l77jRMcmxXk3PiEebldDUs8WFdM8X3Evq1S9p5F+o0VZhx8sqaQsmFEB9Ukp5ND5Q/0g2kQ/LF+rQ==}
+
+  '@iconify-json/simple-icons@1.2.99':
+    resolution: {integrity: sha512-kouZhqvUoNdxEe+lZksbJJZMCZv4b4Ob62O1GW3fcpz/I0mVPzM+9/Qf/DUuv5ns8l6c46D8M/ubhJjjbLp9HQ==}
 
   '@iconify/collections@1.0.690':
     resolution: {integrity: sha512-iFhZJEBrFOVnH+6q3YlJq16eE/qTRYff4ugRq/zdNwFOcOXjsmjcXXV56JOM6glz0YkOM53MFXV7WR9anoo+pQ==}
@@ -5586,7 +5598,7 @@ snapshots:
 
   '@colordx/core@5.4.3': {}
 
-  '@deadbyte/runtime@file:../deadbyte-runtime':
+  '@deadbyte/runtime@4.0.1':
     dependencies:
       defu: 6.1.7
       destr: 2.0.5
@@ -6002,6 +6014,14 @@ snapshots:
   '@humanwhocodes/module-importer@1.0.1': {}
 
   '@humanwhocodes/retry@0.4.3': {}
+
+  '@iconify-json/lucide@1.2.142':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/simple-icons@1.2.99':
+    dependencies:
+      '@iconify/types': 2.0.0
 
   '@iconify/collections@1.0.690':
     dependencies:

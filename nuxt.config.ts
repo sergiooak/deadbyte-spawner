@@ -69,8 +69,8 @@ export default defineNuxtConfig({
     include: ['/api/**'],
     exclude: ['/api/_nuxt_icon/**', '/api/health', '/api/_dev/**'],
     redact: {
-      builtins: ['email', 'phone', 'creditCard', 'jwt', 'bearer', 'iban'],
-      paths: ['body.password', 'password', 'body.phoneNumber', 'phoneNumber', 'body.media', 'media.base64', 'base64']
+      builtins: ['email', 'creditCard', 'jwt', 'bearer', 'iban'],
+      paths: ['body.password', 'password', 'body.media', 'media.base64', 'base64']
     },
     sampling: {
       // O painel faz polling a cada poucos segundos: guarda 10% das leituras normais.

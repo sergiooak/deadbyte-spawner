@@ -31,5 +31,5 @@ Revise os logs de produção do DeadByte dos últimos ${ARGUMENTS:-7} dias e pro
 
 ## Cuidados
 
-- Os eventos têm nomes de pessoas e grupos. Não copie dados pessoais para o relatório além do necessário. Números já vêm mascarados; mantenha assim.
+- Os eventos têm nomes de pessoas e grupos. Os números vêm completos nos logs; no relatório, cite só o necessário para identificar o caso.
 - Não imprima tokens, chaves ou o conteúdo de variáveis de ambiente.

@@ -34,7 +34,7 @@ Todo evento tem `timestamp`, `level` (`info`, `warn`, `error`), `service`, `envi
 
 | Identificação | Quando | Campos úteis |
 | --- | --- | --- |
-| `operation: "message"` | Mensagem que acionou um comando | `outcome` (`ok`, `error`, `denied`, `disabled`, `incomplete`), `command.id/alias/group`, `chat.type/name`, `sender.name/number` (número mascarado), `steps` (eventos em ordem), `details` (dados de cada passo, ex.: figurinha), `durationMs`, `error` com `why`/`fix` |
+| `operation: "message"` | Mensagem que acionou um comando | `outcome` (`ok`, `error`, `denied`, `disabled`, `incomplete`), `command.id/alias/group`, `chat.type/name`, `sender.name/number` (número completo, só dígitos), `steps` (eventos em ordem), `details` (dados de cada passo, ex.: figurinha), `durationMs`, `error` com `why`/`fix` |
 | `event: "runtime.started"` | Bot subiu | `mode`, `clientId` |
 | `event: "whatsapp.*"` | Login, conexão, desconexão | `reason` em desconexões |
 
@@ -83,4 +83,4 @@ O comando `/revisar-logs` do Claude Code (em `.claude/commands/revisar-logs.md`)
 
 ## LGPD
 
-Nomes de exibição e nomes de grupo entram nos logs para identificar quem usou cada comando. Os números de telefone saem mascarados, e e-mails, cartões e tokens são mascarados pelo `redact` do evlog. A retenção padrão de 180 dias acompanha o Marco Civil da Internet (art. 15). Prazo maior precisa de justificativa documentada.
+Nomes de exibição, nomes de grupo e números de telefone entram completos nos logs para identificar quem usou cada comando. E-mails, cartões e tokens são mascarados pelo `redact` do evlog. A retenção padrão de 180 dias acompanha o Marco Civil da Internet (art. 15). Prazo maior precisa de justificativa documentada.

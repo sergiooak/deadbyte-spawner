@@ -84,7 +84,7 @@ Wide events do evlog em `/data/logs` (spawner e um diretório por bot), com rete
 O banco guarda logs dos bots, que podem conter números de telefone, nomes e trechos de mensagens. Para atender aos princípios de necessidade e minimização:
 
 - Logs e eventos são apagados automaticamente após `DEADBYTE_LOG_RETENTION_DAYS` dias (padrão 180). A LGPD não fixa prazo máximo: exige guardar só enquanto houver finalidade (arts. 15 e 16). Os 180 dias acompanham o Marco Civil da Internet (art. 15), que manda guardar registros de acesso a aplicações por 6 meses. Prazo maior precisa de justificativa documentada.
-- O número usado no pareamento por código não é salvo: passa só pela memória do bot e aparece mascarado nos eventos. O código de pareamento não vai para logs nem eventos.
+- O número usado no pareamento por código não é salvo na configuração: passa pela memória do bot e aparece nos eventos. O código de pareamento não vai para logs nem eventos.
 - As tabelas `seen_contact`, `seen_chat` e `message_event` existem no schema mas ainda não são preenchidas. Antes de ativá-las, defina a finalidade e a base legal do tratamento.
 - O painel exige login e não deve ser exposto sem HTTPS.
 

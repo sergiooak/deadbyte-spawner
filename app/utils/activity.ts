@@ -37,6 +37,8 @@ export type ActivityItem = {
 const SYSTEM_EVENTS: Record<string, { title: string; icon: string; tone: Tone }> = {
   'runtime.started': { title: 'Bot iniciado', icon: 'i-nucleo-media-play', tone: 'info' },
   'runtime.stopped': { title: 'Bot parado', icon: 'i-nucleo-media-stop', tone: 'neutral' },
+  'runtime.catch_up.started': { title: 'Reprocessando pendentes', icon: 'i-nucleo-history', tone: 'info' },
+  'runtime.catch_up.finished': { title: 'Pendentes reprocessados', icon: 'i-nucleo-history', tone: 'success' },
   'runtime.config.loaded': { title: 'Configuração carregada', icon: 'i-nucleo-gear', tone: 'neutral' },
   'runtime.config.invalid': { title: 'Configuração inválida', icon: 'i-nucleo-triangle-warning', tone: 'error' },
   'whatsapp.qr.generated': { title: 'QR gerado', icon: 'i-nucleo-qrcode', tone: 'warning' },

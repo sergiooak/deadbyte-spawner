@@ -112,6 +112,8 @@ O banco guarda logs dos bots, que podem conter números de telefone, nomes e tre
 | `DEADBYTE_BOT_DEFAULT_REPOSITORY_URL` | repo do `deadbyte-bot` | Repositório oficial, criado e protegido no boot |
 | `DEADBYTE_INTERNAL_PORT_START`/`END` | `41000`/`41999` | Portas da API interna dos bots |
 | `DEADBYTE_LOG_RETENTION_DAYS` | `180` | Retenção de logs e eventos (0 desliga) |
+| `DEADBYTE_CATCHUP` | `on` | Ao conectar, responde mensagens que chegaram com o bot desligado (`off` desliga) |
+| `DEADBYTE_TIMEZONE` | `America/Sao_Paulo` | Fuso do "pendentes de hoje" |
 | `DEADBYTE_CHROME_PATH` | Chromium do sistema no Docker | Navegador do whatsapp-web.js |
 | `FFMPEG_PATH`, `FFPROBE_PATH` | FFmpeg do sistema no Docker | Mídia |
 | `DEADBYTE_REMBG_URL` | `http://rembg:7000` no compose | Servidor rembg (repassado aos bots) |

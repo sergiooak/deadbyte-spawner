@@ -17,7 +17,9 @@ const ALLOWED: Array<{ method: Method; pattern: RegExp }> = [
   { method: 'POST', pattern: /^chats\/[^/]+\/messages$/ },
   { method: 'POST', pattern: /^chats\/[^/]+\/actions$/ },
   { method: 'PATCH', pattern: /^chats\/[^/]+\/group$/ },
-  { method: 'GET', pattern: /^chats\/[^/]+\/invite-link$/ }
+  { method: 'GET', pattern: /^chats\/[^/]+\/invite-link$/ },
+  { method: 'GET', pattern: /^catch-up$/ },
+  { method: 'POST', pattern: /^catch-up$/ }
 ]
 
 /**

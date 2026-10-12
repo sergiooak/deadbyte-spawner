@@ -55,6 +55,8 @@
               </dl>
             </UCard>
 
+            <InstanceCatchUpCard :slug="slug" :status="instance.status" />
+
             <UCard>
               <template #header>
                 <div class="flex items-center justify-between">

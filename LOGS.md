@@ -37,6 +37,7 @@ Todo evento tem `timestamp`, `level` (`info`, `warn`, `error`), `service`, `envi
 | `operation: "message"` | Mensagem que acionou um comando | `outcome` (`ok`, `error`, `denied`, `disabled`, `incomplete`), `command.id/alias/group`, `chat.type/name`, `sender.name/number` (número completo, só dígitos), `steps` (eventos em ordem), `details` (dados de cada passo, ex.: figurinha), `durationMs`, `error` com `why`/`fix` |
 | `event: "runtime.started"` | Bot subiu | `mode`, `clientId` |
 | `event: "whatsapp.*"` | Login, conexão, desconexão | `reason` em desconexões |
+| `runtime.catch_up.started` / `.finished` (eventos do painel) | Reprocessamento de pendentes ao conectar ou pelo botão | `mode` (`checkpoint`, `unread`, `today`), `since`, `chats`, `messages`, `skipped`, `error` |
 
 Mensagens sem comando não são gravadas. O texto das mensagens nunca entra nos logs. QR e código de pareamento também não.
 

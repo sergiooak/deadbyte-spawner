@@ -14,6 +14,13 @@ export type LoadedRepositoryManifest = {
 const OUTPUT_TAIL_LINES = 20
 
 /**
+ * Instalação e build do bot precisam das devDependencies (unbuild, typescript) e dos scripts
+ * prepare de dependências git (o fork do whatsapp-web.js roda husky/is-ci). Com o NODE_ENV=production
+ * do container, pnpm e npm pulam as devDependencies e o prepare falha. Os bots continuam rodando em produção.
+ */
+const BUILD_ENV = { NODE_ENV: 'development' }
+
+/**
  * Roda o comando mostrando a saída nos logs do container e, se falhar, põe o fim da saída na
  * mensagem do erro: é ela que aparece no card de sincronização do painel.
  */
@@ -94,11 +101,11 @@ export class RepositoryManifestService {
   async install(cwd: string, command: string): Promise<void> {
     await this.ensureIsolatedWorkspace(cwd)
     await this.patchFileDependencies(cwd)
-    await runVisible(`${command} --dangerously-allow-all-builds`, cwd, { npm_config_dangerously_allow_all_builds: 'true' })
+    await runVisible(`${command} --dangerously-allow-all-builds`, cwd, { ...BUILD_ENV, npm_config_dangerously_allow_all_builds: 'true' })
   }
 
   async build(cwd: string, command: string): Promise<void> {
-    await runVisible(command, cwd)
+    await runVisible(command, cwd, BUILD_ENV)
   }
 
   async load(cwd: string, command: string): Promise<LoadedRepositoryManifest> {

@@ -1,21 +1,30 @@
 export default defineNuxtConfig({
   modules: ['@nuxt/ui'],
+  // Painel administrativo atrás de login: não precisa de SSR.
+  ssr: false,
   css: ['~/assets/css/main.css'],
+  // Painel só em dark mode.
+  colorMode: {
+    preference: 'dark',
+    fallback: 'dark',
+    storageKey: 'deadbyte-color-mode'
+  },
   devtools: { enabled: true },
-  compatibilityDate: '2026-05-30',
-  runtimeConfig: {
-    databaseUrl: process.env.DATABASE_URL,
-    deadbyte: {
-      dataDir: process.env.DEADBYTE_DATA_DIR ?? './.deadbyte',
-      reposDir: process.env.DEADBYTE_REPOS_DIR ?? './.deadbyte/repos',
-      instancesDir: process.env.DEADBYTE_INSTANCES_DIR ?? './.deadbyte/instances',
-      sessionsDir: process.env.DEADBYTE_SESSIONS_DIR ?? './.deadbyte/sessions',
-      logsDir: process.env.DEADBYTE_LOGS_DIR ?? './.deadbyte/logs',
-      defaultRepositoryUrl: process.env.DEADBYTE_BOT_DEFAULT_REPOSITORY_URL ?? 'https://github.com/sergiooak/deadbyte-bot.git',
-      defaultBranch: process.env.DEADBYTE_BOT_DEFAULT_BRANCH ?? 'master',
-      internalHost: process.env.DEADBYTE_INTERNAL_HOST ?? '127.0.0.1',
-      internalPortStart: Number(process.env.DEADBYTE_INTERNAL_PORT_START ?? 41000),
-      internalPortEnd: Number(process.env.DEADBYTE_INTERNAL_PORT_END ?? 41999)
+  app: {
+    head: {
+      title: 'DeadByte Spawner',
+      htmlAttrs: { lang: 'pt-BR' },
+      meta: [
+        { name: 'robots', content: 'noindex, nofollow' },
+        { name: 'theme-color', content: '#0a0a0a' }
+      ],
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }]
     }
-  }
+  },
+  icon: {
+    // Ícones empacotados no build: o painel não depende da API pública do Iconify.
+    serverBundle: { collections: ['lucide', 'simple-icons'] },
+    clientBundle: { scan: true }
+  },
+  compatibilityDate: '2026-05-30'
 })

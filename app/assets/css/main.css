@@ -1,3 +1,17 @@
 @import "tailwindcss";
-
 @import "@nuxt/ui";
+
+@theme static {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  --ui-radius: 0.5rem;
+}
+
+/* Barra de rolagem discreta nos visualizadores de log */
+.log-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-border-accented) transparent;
+}

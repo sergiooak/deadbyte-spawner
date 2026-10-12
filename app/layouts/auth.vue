@@ -2,8 +2,11 @@
   <div class="grid min-h-dvh bg-default lg:grid-cols-[1.2fr_1fr]">
     <!-- Hero do brandbook (public/brand/login-hero.png, versão leve em web/), só em telas grandes -->
     <div class="relative hidden overflow-hidden border-r border-default lg:block">
-      <img src="/brand/web/login-hero.webp" alt="" class="absolute inset-0 size-full object-cover object-right" />
-      <div aria-hidden="true" class="absolute inset-0 bg-linear-to-r from-transparent via-transparent to-black" />
+      <!-- Imagem inteira na altura, presa à direita; o que sobrar à esquerda some no fundo pelo fade -->
+      <div class="absolute inset-y-0 right-0 aspect-[8/5] h-full">
+        <img src="/brand/web/login-hero.webp" alt="" class="size-full object-cover" />
+        <div aria-hidden="true" class="absolute inset-0 bg-linear-to-r from-(--ui-bg) via-(--ui-bg)/40 via-25% to-transparent to-60%" />
+      </div>
       <div aria-hidden="true" class="scanlines absolute inset-0" />
     </div>
 

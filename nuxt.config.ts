@@ -18,7 +18,7 @@ const nuxtUiIcons = (JSON.parse(readFileSync(fromRoot('./icons/ui-icons.json'), 
 )
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', 'evlog/nuxt'],
   // Painel administrativo atrás de login: não precisa de SSR.
   ssr: false,
   css: ['~/assets/css/main.css'],
@@ -62,6 +62,23 @@ export default defineNuxtConfig({
       sizeLimitKb: 256
     }
   },
+  // Logs estruturados (wide events): um por requisição da API, mais as operações internas.
+  // Destino em server/plugins/evlog.ts; formato e roteiro de revisão em LOGS.md.
+  evlog: {
+    env: { service: 'deadbyte-spawner' },
+    include: ['/api/**'],
+    exclude: ['/api/_nuxt_icon/**', '/api/health', '/api/_dev/**'],
+    redact: {
+      builtins: ['email', 'phone', 'creditCard', 'jwt', 'bearer', 'iban'],
+      paths: ['body.password', 'password', 'body.phoneNumber', 'phoneNumber', 'body.media', 'media.base64', 'base64']
+    },
+    sampling: {
+      // O painel faz polling a cada poucos segundos: guarda 10% das leituras normais.
+      rates: { info: 10, debug: 0 },
+      // Sempre guarda erros e lentidão. Escritas são forçadas no hook evlog:emit:keep.
+      keep: [{ status: 400 }, { duration: 1500 }]
+    }
+  },
   fonts: {
     families: [
       { name: 'Pixelify Sans', provider: 'google', weights: [400, 500, 600, 700] },
@@ -82,5 +99,9 @@ export default defineNuxtConfig({
         runtimeConfig: { nucleoSource }
       }
     : { icon: { customCollections: [nucleoUsed] } },
+  // WebSocket do painel (server/routes/_ws.ts): status, eventos e logs em tempo real.
+  nitro: {
+    experimental: { websocket: true }
+  },
   compatibilityDate: '2026-05-30'
 })

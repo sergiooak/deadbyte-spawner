@@ -7,8 +7,10 @@ import postgres from 'postgres'
 import { db } from '../db/client.js'
 import { instance, runtimeEvent, runtimeProcessLog } from '../db/schema/index.js'
 import { childProcessManager } from '../services/process/child-process-manager.js'
+import { ensureOfficialRepository } from '../services/repositories/official-repository.js'
 import { repositorySyncService } from '../services/repositories/repository-sync.service.js'
 import { readSpawnerEnv } from './env.js'
+import { timedStep, withOperationLog } from './operation-log.js'
 import { spawnerPaths } from './paths.js'
 
 /**
@@ -51,26 +53,34 @@ async function runMigrations() {
  * e sobe de novo as instâncias que estavam ligadas (autoStart).
  */
 export async function resumeInstances() {
-  await ensureBootstrapped()
-  await db.update(instance).set({ status: 'stopped', updatedAt: new Date() }).where(inArray(instance.status, RUNNING_STATUSES))
+  await withOperationLog('spawner.boot', {}, async (log) => {
+    await timedStep(log, 'migrations', () => ensureBootstrapped())
+    log.set({ officialRepository: await ensureOfficialRepository() })
+    const reset = await db
+      .update(instance)
+      .set({ status: 'stopped', updatedAt: new Date() })
+      .where(inArray(instance.status, RUNNING_STATUSES))
+      .returning({ slug: instance.slug })
 
-  const rows = await db.select().from(instance).where(eq(instance.autoStart, true))
-  const syncedRepos = new Set<string>()
-  for (const row of rows) {
-    try {
-      const repoReady = await pathExists(resolve(row.repoPath, 'node_modules')) && await pathExists(resolve(row.repoPath, 'package.json'))
-      if (!repoReady && !syncedRepos.has(row.repositorySlug)) {
-        console.info(`[spawner] repository ${row.repositorySlug} is missing on disk; syncing before starting ${row.slug}.`)
-        await repositorySyncService.sync(row.repositorySlug)
-        syncedRepos.add(row.repositorySlug)
+    const rows = await db.select().from(instance).where(eq(instance.autoStart, true))
+    const syncedRepos = new Set<string>()
+    const results: Record<string, string> = {}
+    for (const row of rows) {
+      try {
+        const repoReady = (await pathExists(resolve(row.repoPath, 'node_modules'))) && (await pathExists(resolve(row.repoPath, 'package.json')))
+        if (!repoReady && !syncedRepos.has(row.repositorySlug)) {
+          await timedStep(log, `sync:${row.repositorySlug}`, () => repositorySyncService.sync(row.repositorySlug))
+          syncedRepos.add(row.repositorySlug)
+        }
+        await childProcessManager.start(row.slug, { persist: false })
+        results[row.slug] = 'started'
+      } catch (error) {
+        results[row.slug] = `error: ${error instanceof Error ? error.message : String(error)}`
+        await db.update(instance).set({ status: 'error', updatedAt: new Date() }).where(eq(instance.slug, row.slug))
       }
-      console.info(`[spawner] auto-starting instance ${row.slug}.`)
-      await childProcessManager.start(row.slug, { persist: false })
-    } catch (error) {
-      console.error(`[spawner] failed to auto-start ${row.slug}:`, error)
-      await db.update(instance).set({ status: 'error', updatedAt: new Date() }).where(eq(instance.slug, row.slug))
     }
-  }
+    log.set({ staleStatusesReset: reset.length, autoStart: results, resyncedRepositories: [...syncedRepos] })
+  })
 }
 
 export async function pruneOldLogs() {
@@ -78,9 +88,12 @@ export async function pruneOldLogs() {
   if (!Number.isFinite(days) || days <= 0) {
     return
   }
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-  await db.delete(runtimeProcessLog).where(lt(runtimeProcessLog.createdAt, cutoff))
-  await db.delete(runtimeEvent).where(lt(runtimeEvent.createdAt, cutoff))
+  await withOperationLog('logs.prune', { retentionDays: days }, async (log) => {
+    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+    const logs = await db.delete(runtimeProcessLog).where(lt(runtimeProcessLog.createdAt, cutoff)).returning({ id: runtimeProcessLog.id })
+    const events = await db.delete(runtimeEvent).where(lt(runtimeEvent.createdAt, cutoff)).returning({ id: runtimeEvent.id })
+    log.set({ deleted: { processLogs: logs.length, runtimeEvents: events.length } })
+  })
 }
 
 async function pathExists(path: string): Promise<boolean> {

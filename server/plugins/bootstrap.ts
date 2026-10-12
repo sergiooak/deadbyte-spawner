@@ -1,3 +1,4 @@
+import { spawnerLog } from '../utils/spawner-log.js'
 import { childProcessManager } from '../services/process/child-process-manager.js'
 import { adminPasswordProblem } from '../utils/auth.js'
 import { ensureBootstrapped, pruneOldLogs, resumeInstances } from '../utils/bootstrap.js'
@@ -12,18 +13,15 @@ export default defineNitroPlugin((nitroApp) => {
 
   const passwordProblem = adminPasswordProblem()
   if (passwordProblem) {
-    console.warn(`[spawner] ${passwordProblem} O painel fica bloqueado em produção.`)
+    spawnerLog.warn({ event: 'auth.not_configured', why: passwordProblem, fix: 'Defina DEADBYTE_ADMIN_PASSWORD (16+ caracteres) no ambiente e reinicie.' })
   }
 
   void ensureBootstrapped()
-    .then(() => {
-      console.info('[spawner] database migrations applied.')
-      return resumeInstances()
-    })
-    .catch((error) => console.error('[spawner] bootstrap failed:', error))
+    .then(() => resumeInstances())
+    .catch(() => undefined)
 
   const pruneTimer = setInterval(() => {
-    void pruneOldLogs().catch((error) => console.error('[spawner] log pruning failed:', error))
+    void pruneOldLogs().catch(() => undefined)
   }, PRUNE_INTERVAL_MS)
   pruneTimer.unref()
 

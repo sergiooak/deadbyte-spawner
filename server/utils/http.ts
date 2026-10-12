@@ -13,7 +13,8 @@ export async function withHttpErrors<T>(task: () => Promise<T>, statusCode = 400
   try {
     return await task()
   } catch (error) {
-    if (error && typeof error === 'object' && 'statusCode' in error) {
+    // Erros do h3 e erros estruturados do evlog (com why/fix) seguem como estão.
+    if (error && typeof error === 'object' && ('statusCode' in error || 'why' in error)) {
       throw error
     }
     const message = error instanceof Error ? error.message : String(error)

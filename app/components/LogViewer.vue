@@ -113,8 +113,12 @@ const visible = computed(() => {
   })
 })
 
+// Logs antigos ainda podem ter códigos de cor ANSI.
+const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g
+
 function display(line: string) {
-  return line.startsWith(EVENT_PREFIX) ? `⚡ ${line.slice(EVENT_PREFIX.length)}` : line
+  const clean = line.replace(ANSI, '')
+  return clean.startsWith(EVENT_PREFIX) ? `⚡ ${clean.slice(EVENT_PREFIX.length)}` : clean
 }
 
 function lineClass(line: ProcessLog) {

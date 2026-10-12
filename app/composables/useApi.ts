@@ -13,9 +13,15 @@ export function apiRequest<T = unknown>(url: string, options: Parameters<typeof 
   return (useNuxtApp().$api as typeof $fetch)<T>(url, options)
 }
 
+type ErrorBody = { statusMessage?: string; message?: string; why?: string; fix?: string; data?: { message?: string; why?: string; fix?: string } }
+
+/** Mensagem legível de um erro da API, incluindo o porquê e a correção dos erros estruturados (evlog). */
 export function errorMessage(error: unknown, fallback = 'Algo deu errado.'): string {
-  const data = (error as { data?: { statusMessage?: string; message?: string; data?: { message?: string } } })?.data
-  return data?.data?.message ?? data?.statusMessage ?? data?.message ?? (error instanceof Error ? error.message : fallback)
+  const data = (error as { data?: ErrorBody })?.data
+  const base = data?.data?.message ?? data?.statusMessage ?? data?.message ?? (error instanceof Error ? error.message : fallback)
+  const why = data?.why ?? data?.data?.why
+  const fix = data?.fix ?? data?.data?.fix
+  return [base, why, fix ? `Como resolver: ${fix}` : undefined].filter(Boolean).join(' · ')
 }
 
 /** Executa uma ação mostrando toast de sucesso/erro. Retorna o resultado ou undefined em caso de erro. */

@@ -1,7 +1,10 @@
 import { eq } from 'drizzle-orm'
+import type { RequestLogger } from 'evlog'
 import { db } from '../../db/client.js'
 import { instance } from '../../db/schema/index.js'
+import { timedStep, withOperationLog } from '../../utils/operation-log.js'
 import { spawnerPaths } from '../../utils/paths.js'
+import { publish } from '../../utils/realtime.js'
 import { GitService } from '../git/git.service.js'
 import { InstanceService } from '../instances/instance.service.js'
 import { CommandSyncService, type CommandSyncSummary } from './command-sync.service.js'
@@ -30,12 +33,22 @@ export class RepositorySyncService {
       return await running
     }
 
-    const task = this.run(slug).finally(() => runningSyncs.delete(slug))
+    publish({ type: 'repository.sync', slug, state: 'started' })
+    const task = withOperationLog('repository.sync', { repositorySlug: slug }, (log) => this.run(slug, log))
+      .then((result) => {
+        publish({ type: 'repository.sync', slug, state: 'finished' })
+        return result
+      })
+      .catch((error) => {
+        publish({ type: 'repository.sync', slug, state: 'failed', message: error instanceof Error ? error.message : String(error) })
+        throw error
+      })
+      .finally(() => runningSyncs.delete(slug))
     runningSyncs.set(slug, task)
     return await task
   }
 
-  private async run(slug: string): Promise<RepositorySyncResult> {
+  private async run(slug: string, log: RequestLogger): Promise<RepositorySyncResult> {
     const startedAt = Date.now()
     const repository = await new RepositoryService().get(slug)
     if (!repository) {
@@ -44,13 +57,15 @@ export class RepositorySyncService {
 
     const path = spawnerPaths().repositoryPath(slug)
     const git = new GitService()
-    await git.ensureRepository({ repositoryUrl: repository.repositoryUrl, branch: repository.defaultBranch, path })
+    log.set({ repositoryUrl: repository.repositoryUrl, branch: repository.defaultBranch })
+    await timedStep(log, 'git', () => git.ensureRepository({ repositoryUrl: repository.repositoryUrl, branch: repository.defaultBranch, path }))
     const commitHash = await git.currentCommit(path)
+    log.set({ commitHash })
 
     const manifestService = new RepositoryManifestService()
-    await manifestService.install(path, repository.installCommand)
-    await manifestService.build(path, repository.buildCommand)
-    const loaded = await manifestService.load(path, repository.manifestCommand)
+    await timedStep(log, 'install', () => manifestService.install(path, repository.installCommand))
+    await timedStep(log, 'build', () => manifestService.build(path, repository.buildCommand))
+    const loaded = await timedStep(log, 'manifest', () => manifestService.load(path, repository.manifestCommand))
     const summary = await new CommandSyncService().sync({
       repositorySlug: slug,
       branch: repository.defaultBranch,
@@ -70,6 +85,7 @@ export class RepositorySyncService {
       .set({ commitHash, repositoryVersionId: summary.repositoryVersionId, updatedAt: new Date() })
       .where(eq(instance.repositorySlug, slug))
 
+    log.set({ result: { ...summary, instancesUpdated: instances.length } })
     return { ...summary, commitHash, durationMs: Date.now() - startedAt }
   }
 }

@@ -2,6 +2,7 @@
 
 Os PNGs em public/brand/ são os originais (1024 px, 1,5 MB cada). O painel mostra a logo em 28 px
 e as ilustrações em até 256 px, então serve as cópias de public/brand/web/.
+Os favicons e o apple-touch-icon também saem daqui, reescalados da logo e do ícone do app.
 
 Uso, depois de trocar qualquer imagem em public/brand/:
     python -I brand/optimize.py
@@ -31,6 +32,22 @@ OUTPUTS = [
 ]
 
 
+def make_favicons() -> None:
+    # Cabeça recortada até a borda do alfa, centralizada num quadrado e reduzida com Lanczos.
+    mark = Image.open(SOURCE / 'logo-mark.png').convert('RGBA')
+    head = mark.crop(mark.getchannel('A').point(lambda a: 255 if a > 24 else 0).getbbox())
+    side = max(head.size)
+    square = Image.new('RGBA', (side, side), (0, 0, 0, 0))
+    square.paste(head, ((side - head.width) // 2, (side - head.height) // 2))
+    for size in (32, 16):
+        out = SOURCE / f'favicon-{size}.png'
+        square.resize((size, size), Image.LANCZOS).save(out, optimize=True)
+        print(f'{out.relative_to(ROOT)}  {size}x{size}  {out.stat().st_size} B')
+    out = SOURCE / 'apple-touch-icon.png'
+    Image.open(SOURCE / 'icon-512.png').convert('RGB').resize((180, 180), Image.LANCZOS).save(out, optimize=True)
+    print(f'{out.relative_to(ROOT)}  180x180  {out.stat().st_size // 1024} KB')
+
+
 def main() -> None:
     TARGET.mkdir(exist_ok=True)
     for name, max_width, fmt, quality in OUTPUTS:
@@ -47,3 +64,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+    make_favicons()

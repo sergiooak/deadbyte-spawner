@@ -30,12 +30,12 @@ O repositório traz `Dockerfile` e `docker-compose.yml` prontos. A stack sobe tr
 4. Em **Environment Variables**, confira:
    - `SERVICE_PASSWORD_64_ADMIN`: senha do painel. A Coolify gera automaticamente. Para usar uma sua, troque o valor (mínimo 16 caracteres).
    - `SERVICE_PASSWORD_POSTGRES`: gerada automaticamente. Não precisa mexer.
-   - Opcionais: `DEADBYTE_TEXAS_API_KEY`, `DEADBYTE_TYPESAFE_API_KEY`, `DEADBYTE_OPENAI_API_KEY` (comandos de música, Jev e parser).
+   - Opcionais: `DEADBYTE_TEXAS_API_KEY`, `DEADBYTE_TTP_API_KEY`, `DEADBYTE_TYPESAFE_API_KEY`, `DEADBYTE_OPENAI_API_KEY` (comandos de música, figurinha de texto, Jev e parser).
 5. Clique em **Deploy**. O primeiro build leva alguns minutos.
 6. Abra o domínio, entre com a senha e siga o onboarding do painel:
    1. **Repositórios → Novo repositório** (já vem preenchido com `sergiooak/deadbyte-bot`) com "Sincronizar logo depois" ligado.
    2. **Instâncias → Nova instância** com "Iniciar agora".
-   3. Escaneie o QR em WhatsApp → Aparelhos conectados.
+   3. Conecte o WhatsApp: escaneie o QR (Aparelhos conectados → Conectar um aparelho) ou, sem um segundo aparelho, use a aba **Número**: o painel gera um código de pareamento de 8 caracteres e o WhatsApp do celular mostra uma notificação para digitar o código.
 
 ### O que persiste entre deploys
 
@@ -67,7 +67,8 @@ Faça push no `deadbyte-bot`, abra o repositório no painel, clique em **Sincron
 
 O banco guarda logs dos bots, que podem conter números de telefone, nomes e trechos de mensagens. Para atender aos princípios de necessidade e minimização:
 
-- Logs e eventos são apagados automaticamente após `DEADBYTE_LOG_RETENTION_DAYS` dias (padrão 7).
+- Logs e eventos são apagados automaticamente após `DEADBYTE_LOG_RETENTION_DAYS` dias (padrão 180). A LGPD não fixa prazo máximo: exige guardar só enquanto houver finalidade (arts. 15 e 16). Os 180 dias acompanham o Marco Civil da Internet (art. 15), que manda guardar registros de acesso a aplicações por 6 meses. Prazo maior precisa de justificativa documentada.
+- O número usado no pareamento por código não é salvo: passa só pela memória do bot e aparece mascarado nos eventos. O código de pareamento não vai para logs nem eventos.
 - As tabelas `seen_contact`, `seen_chat` e `message_event` existem no schema mas ainda não são preenchidas. Antes de ativá-las, defina a finalidade e a base legal do tratamento.
 - O painel exige login e não deve ser exposto sem HTTPS.
 
@@ -80,11 +81,35 @@ O banco guarda logs dos bots, que podem conter números de telefone, nomes e tre
 | `DEADBYTE_DATA_DIR` | `./.deadbyte` (`/data` no Docker) | Raiz de repos, instâncias e sessões |
 | `DEADBYTE_BOT_DEFAULT_REPOSITORY_URL` | repo do `deadbyte-bot` | Sugestão no cadastro |
 | `DEADBYTE_INTERNAL_PORT_START`/`END` | `41000`/`41999` | Portas da API interna dos bots |
-| `DEADBYTE_LOG_RETENTION_DAYS` | `7` | Retenção de logs e eventos (0 desliga) |
+| `DEADBYTE_LOG_RETENTION_DAYS` | `180` | Retenção de logs e eventos (0 desliga) |
 | `DEADBYTE_CHROME_PATH` | Chromium do sistema no Docker | Navegador do whatsapp-web.js |
 | `FFMPEG_PATH`, `FFPROBE_PATH` | FFmpeg do sistema no Docker | Mídia |
 | `DEADBYTE_REMBG_URL` | `http://rembg:7000` no compose | Servidor rembg (repassado aos bots) |
-| `DEADBYTE_TEXAS_API_KEY`, `DEADBYTE_TYPESAFE_API_KEY`, `DEADBYTE_OPENAI_API_KEY` | — | Chaves opcionais repassadas aos bots |
+| `DEADBYTE_TEXAS_API_KEY`, `DEADBYTE_TTP_API_KEY`, `DEADBYTE_TYPESAFE_API_KEY`, `DEADBYTE_OPENAI_API_KEY` | — | Chaves opcionais repassadas aos bots |
+
+## Identidade visual
+
+- Tema só escuro, quadrado (`--ui-radius: 0`), alto contraste, primary `emerald` com brilho neon e cinzas `neutral`.
+- Fontes (Google Fonts via `@nuxt/fonts`): **Pixelify Sans** nos títulos e números, **Chakra Petch** no corpo, **JetBrains Mono** em código, logs e controles.
+- Imagens da marca em `public/brand/` (logo, favicons, hero do login, OG e ilustrações de estado). Hoje são placeholders; os prompts para gerar cada uma, usando as artes originais de `brand/reference/` como referência, estão em [brand/PROMPTS.md](brand/PROMPTS.md). Basta trocar o arquivo mantendo nome e tamanho.
+
+### Ícones Nucleo Pixel
+
+Os ícones são do **Nucleo Pixel** (`i-nucleo-<nome>`), no mesmo esquema do nuxt-layer da Supporte: CLI `nucleo`, mapa de decisões em `icons/map.json` e página `/dev/icons` em dev. Logo de marca vem do simple-icons. Os SVGs ficam exatamente como o Nucleo exportou.
+
+A licença do Nucleo não permite publicar o catálogo e este repo é público. Por isso:
+
+- O catálogo completo fica em `icons/nucleo-source.json`, fora do git. Copie o export do Nucleo Pixel para lá.
+- O repo guarda só `icons/nucleo.json`, recortado com os ícones usados.
+
+```bash
+node cli/nucleo.mjs search robot bot
+node cli/nucleo.mjs map instancia
+pnpm icons:build
+pnpm icons:check
+```
+
+`pnpm build` roda o `icons:check` antes e falha se algum ícone usado não estiver na coleção. Passo a passo para escolher ícone: [.agents/skills/nucleo-icons/SKILL.md](.agents/skills/nucleo-icons/SKILL.md).
 
 ## Desenvolvimento local
 
@@ -136,6 +161,8 @@ Todas as rotas exigem sessão, exceto `/api/health` e `/api/auth/*`.
 | `POST` | `/api/instances/:slug/start` \| `stop` \| `restart` | Controla o bot |
 | `PATCH` | `/api/instances/:slug/commands` | Liga/desliga comandos e edita aliases |
 | `GET` | `/api/instances/:slug/qr` | QR atual em SVG |
+| `POST` | `/api/instances/:slug/pairing-code` | Gera código de pareamento (`{ phoneNumber }`) |
+| `GET` \| `DELETE` | `/api/instances/:slug/pairing-code` | Código atual / volta para o QR |
 
 ## Comunicação com outros projetos
 

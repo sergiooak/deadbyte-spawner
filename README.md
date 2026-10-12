@@ -24,24 +24,34 @@ O repositório traz `Dockerfile` e `docker-compose.yml` prontos. A stack sobe tr
 
 ### Passo a passo
 
-1. Na Coolify, crie um recurso: **+ New → Public/Private Repository**, aponte para `deadbyte-spawner`, branch `main`.
+1. Na Coolify, crie um recurso: **+ New → Public Repository** (ou Private com a GitHub App), aponte para `sergiooak/deadbyte-spawner`, branch `main`.
 2. Em **Build Pack**, escolha **Docker Compose** (arquivo `/docker-compose.yml`).
-3. Em **Domains**, defina o domínio do serviço `spawner`, por exemplo `https://deadbyte.seudominio.com:3000`. O `:3000` diz à Coolify a porta interna; o acesso externo fica em 443 com HTTPS.
-4. Em **Environment Variables**, confira:
-   - `SERVICE_PASSWORD_64_ADMIN`: senha do painel. A Coolify gera automaticamente. Para usar uma sua, troque o valor (mínimo 16 caracteres).
-   - `SERVICE_PASSWORD_POSTGRES`: gerada automaticamente. Não precisa mexer.
-   - Opcionais: `DEADBYTE_TEXAS_API_KEY`, `DEADBYTE_TTP_API_KEY`, `DEADBYTE_TYPESAFE_API_KEY`, `DEADBYTE_OPENAI_API_KEY` (comandos de música, figurinha de texto, Jev e parser).
-5. Clique em **Deploy**. O primeiro build leva alguns minutos.
-6. Abra o domínio, entre com a senha e siga o onboarding do painel:
-   1. **Repositórios → Novo repositório** (já vem preenchido com `sergiooak/deadbyte-bot`) com "Sincronizar logo depois" ligado.
+3. Em **Domains**, defina o domínio do serviço `spawner` com a porta interna no fim, por exemplo `https://deadbyte.seudominio.com:3000`. O acesso externo fica em 443 com HTTPS (o painel e o WebSocket `/_ws` passam pelo mesmo domínio).
+4. Em **Environment Variables**:
+   - `SERVICE_PASSWORD_64_ADMIN`: senha do painel, gerada pela Coolify. Copie para entrar ou troque por uma sua (16+ caracteres).
+   - `SERVICE_PASSWORD_64_LOGS`: token só leitura da API de logs (`DEADBYTE_LOGS_TOKEN`), gerado pela Coolify.
+   - `SERVICE_PASSWORD_POSTGRES`: gerada pela Coolify. Não mexa depois do primeiro deploy (o banco já foi criado com ela).
+   - `DEADBYTE_TTP_API_KEY`: necessária para o `!ttp`. Sem ela o comando responde erro e o log explica o motivo.
+   - Opcionais: `DEADBYTE_TEXAS_API_KEY` (bíblia, música, emoji), `DEADBYTE_TYPESAFE_API_KEY` e `DEADBYTE_OPENAI_API_KEY` (Jev).
+5. Clique em **Deploy**. O primeiro build leva alguns minutos. Acompanhe em **Logs**: o boot aparece como um evento `spawner.boot`.
+6. Abra o domínio, entre com a senha e siga o onboarding:
+   1. Em **Repositórios**, o oficial (`sergiooak/deadbyte-bot`) já está cadastrado e marcado. Clique nele e em **Sincronizar**.
    2. **Instâncias → Nova instância** com "Iniciar agora".
-   3. Conecte o WhatsApp: escaneie o QR (Aparelhos conectados → Conectar um aparelho) ou, sem um segundo aparelho, use a aba **Número**: o painel gera um código de pareamento de 8 caracteres e o WhatsApp do celular mostra uma notificação para digitar o código.
+   3. Conecte o WhatsApp: escaneie o QR (Aparelhos conectados → Conectar um aparelho) ou, sem um segundo aparelho, use a aba **Número**: o painel gera um código de 8 caracteres e o WhatsApp do celular mostra uma notificação para digitá-lo.
 
-### O que persiste entre deploys
+Forks do bot entram em **Repositórios → Adicionar fork**. O oficial não pode ser excluído nem ter a URL trocada.
 
-O volume `deadbyte-data` (montado em `/data`) guarda repositórios clonados, sessões do WhatsApp e configs das instâncias. Não apague esse volume, senão todos os números precisam escanear o QR de novo.
+### Sessões entre deploys
 
-Depois de um redeploy, as instâncias que estavam ligadas sobem sozinhas (auto-start) e reconectam com a sessão salva.
+O WhatsApp de cada instância continua conectado depois de redeploys e reinícios, sem escanear o QR de novo, desde que:
+
+- **O volume persista.** `deadbyte-data` (montado em `/data`) guarda sessões, repositórios, configs e logs. Na Coolify ele aparece em **Persistent Storage**. Não use "Delete volumes" ao parar ou excluir o recurso, e não renomeie o volume no compose.
+- **O desligamento seja limpo.** O compose dá 60 s (`stop_grace_period`) para o spawner parar os bots, que fecham o Chromium e gravam a sessão no volume.
+- **O auto-start esteja ligado.** No boot, as instâncias com auto-start (ligado ao clicar em Iniciar) sobem sozinhas e reconectam. O evento `spawner.boot` lista o resultado de cada uma.
+
+Se o container morrer no meio (OOM, reboot da VPS), o próximo start encerra bots e Chromium órfãos e limpa as travas do perfil antes de subir. Isso aparece como `orphanKilled`, `strayBotsKilled` ou `orphanChromiumKilled` no evento `instance.start`.
+
+Faça backup do volume de tempos em tempos: é nele que estão as sessões.
 
 ### Atualizar o bot
 
@@ -53,6 +63,10 @@ Faça push no `deadbyte-bot`, abra o repositório no painel, clique em **Sincron
 - O `rembg` usa cerca de 1 GB de RAM. Se não usar o comando de remover fundo, apague o serviço `rembg` do compose.
 - O compose define `shm_size: 1gb` para o Chromium não travar.
 
+### Logs
+
+Wide events do evlog em `/data/logs` (spawner e um diretório por bot), com retenção de `DEADBYTE_LOG_RETENTION_DAYS` dias. Formato, API (`/api/logs` com o token `DEADBYTE_LOGS_TOKEN`) e roteiro de revisão em [LOGS.md](LOGS.md). O comando `/revisar-logs` do Claude Code automatiza a revisão.
+
 ## Segurança
 
 - Login com a senha de `DEADBYTE_ADMIN_PASSWORD` (mínimo 16 caracteres). Sem senha válida, o build de produção fica bloqueado.
@@ -61,6 +75,8 @@ Faça push no `deadbyte-bot`, abra o repositório no painel, clique em **Sincron
 - Requisições de escrita de outra origem são recusadas (proteção CSRF por `Origin`).
 - `/api/internal/*` só aceita chamadas de `127.0.0.1`.
 - `DATABASE_URL`, `DEADBYTE_ADMIN_PASSWORD` e `SERVICE_PASSWORD_*` não são repassadas aos processos dos bots.
+- O WebSocket `/_ws` exige um token de 60 s emitido só para sessões logadas.
+- `DEADBYTE_LOGS_TOKEN` só lê `GET /api/logs*`; não abre o painel.
 - A tela de configurações mostra só se cada segredo está definido, nunca o valor.
 
 ## Dados pessoais (LGPD)
@@ -78,8 +94,9 @@ O banco guarda logs dos bots, que podem conter números de telefone, nomes e tre
 | --- | --- | --- |
 | `DATABASE_URL` | — | Conexão PostgreSQL |
 | `DEADBYTE_ADMIN_PASSWORD` | — | Senha do painel (16+ caracteres) |
+| `DEADBYTE_LOGS_TOKEN` | — | Token só leitura da API de logs (32+ caracteres) |
 | `DEADBYTE_DATA_DIR` | `./.deadbyte` (`/data` no Docker) | Raiz de repos, instâncias e sessões |
-| `DEADBYTE_BOT_DEFAULT_REPOSITORY_URL` | repo do `deadbyte-bot` | Sugestão no cadastro |
+| `DEADBYTE_BOT_DEFAULT_REPOSITORY_URL` | repo do `deadbyte-bot` | Repositório oficial, criado e protegido no boot |
 | `DEADBYTE_INTERNAL_PORT_START`/`END` | `41000`/`41999` | Portas da API interna dos bots |
 | `DEADBYTE_LOG_RETENTION_DAYS` | `180` | Retenção de logs e eventos (0 desliga) |
 | `DEADBYTE_CHROME_PATH` | Chromium do sistema no Docker | Navegador do whatsapp-web.js |

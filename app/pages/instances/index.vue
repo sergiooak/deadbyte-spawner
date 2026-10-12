@@ -79,7 +79,12 @@ const search = ref('')
 const statusFilter = ref('all')
 
 const { data: instances, refresh, status } = await useApi<Instance[]>('/api/instances')
-usePolling(refresh, 5000)
+const { connected: live } = useRealtime({
+  onMessage(message) {
+    if (message.type === 'instance.status') void refresh()
+  }
+})
+usePolling(refresh, 5000, () => !live.value)
 
 const statusTabs = computed(() => {
   const list = instances.value ?? []

@@ -55,9 +55,17 @@ const labels = {
   restart: { success: 'Instância reiniciando', error: 'Não foi possível reiniciar' }
 }
 
+const realtime = useRealtime({ slugs: () => [props.slug] })
+
 async function run(action: 'start' | 'stop' | 'restart') {
   busy.value = action
-  await withToast(() => apiRequest(`/api/instances/${props.slug}/${action}`, { method: 'POST' }), labels[action])
+  await withToast(
+    () =>
+      realtime.connected.value
+        ? realtime.action(`instance.${action}`, props.slug)
+        : apiRequest(`/api/instances/${props.slug}/${action}`, { method: 'POST' }),
+    labels[action]
+  )
   busy.value = undefined
   emit('changed')
 }

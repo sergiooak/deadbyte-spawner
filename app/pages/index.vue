@@ -85,7 +85,12 @@ const createOpen = ref(false)
 const { data: instances, refresh: refreshInstances } = await useApi<Instance[]>('/api/instances')
 const { data: repositories } = await useApi<Repository[]>('/api/repositories')
 
-usePolling(refreshInstances, 5000)
+const { connected: live } = useRealtime({
+  onMessage(message) {
+    if (message.type === 'instance.status') void refreshInstances()
+  }
+})
+usePolling(refreshInstances, 5000, () => !live.value)
 
 const counts = computed(() => {
   const list = instances.value ?? []

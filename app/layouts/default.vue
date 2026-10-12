@@ -35,6 +35,12 @@
 
       <template #footer="{ collapsed }">
         <div class="flex w-full items-center gap-1" :class="collapsed ? 'flex-col' : ''">
+          <UTooltip :text="live ? 'Tempo real conectado' : 'Tempo real desconectado: usando atualização periódica'">
+            <span class="flex items-center gap-2 px-2 font-mono text-[10px] tracking-widest uppercase" :class="live ? 'text-primary' : 'text-dimmed'">
+              <span class="size-2" :class="live ? 'bg-primary neon-dot' : 'bg-neutral-600'" />
+              <span v-if="!collapsed">{{ live ? 'ao vivo' : 'offline' }}</span>
+            </span>
+          </UTooltip>
           <UTooltip v-if="!session?.bypassed" text="Sair">
             <UButton
               icon="i-nucleo-exit-door"
@@ -57,6 +63,7 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 
 const { session, logout } = useAuth()
+const { connected: live } = useRealtime()
 const sidebarOpen = ref(false)
 const route = useRoute()
 

@@ -1,8 +1,8 @@
 import { mkdir } from 'node:fs/promises'
-import { and, desc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import { normalizeCommandName } from '@deadbyte/runtime'
 import { db } from '../../db/client.js'
-import { command, commandAlias, instance, instanceCommand, instanceCommandAlias, repositoryVersion } from '../../db/schema/index.js'
+import { command, commandAlias, instance, instanceCommand, instanceCommandAlias, repository, repositoryVersion } from '../../db/schema/index.js'
 import { readSpawnerEnv } from '../../utils/env.js'
 import { spawnerPaths } from '../../utils/paths.js'
 import { PortService } from '../ports/port.service.js'
@@ -15,7 +15,7 @@ export class InstanceService {
   ) {}
 
   async list() {
-    return await db.select().from(instance)
+    return await db.select().from(instance).orderBy(instance.name)
   }
 
   async get(slug: string) {
@@ -23,8 +23,12 @@ export class InstanceService {
     return row
   }
 
-  async create(input: { repositorySlug: string; name: string; slug: string; clientId: string; branch: string }) {
+  async create(input: { repositorySlug: string; name: string; slug: string; clientId: string; branch?: string; autoStart?: boolean }) {
     const env = readSpawnerEnv()
+    const [repo] = await db.select().from(repository).where(eq(repository.slug, input.repositorySlug)).limit(1)
+    if (!repo) {
+      throw new Error(`Repository not found: ${input.repositorySlug}`)
+    }
     const paths = spawnerPaths()
     const repoPath = paths.repositoryPath(input.repositorySlug)
     const instancePath = paths.instancePath(input.slug)
@@ -50,7 +54,9 @@ export class InstanceService {
         repositoryVersionId: latestVersion?.id,
         name: input.name,
         clientId: input.clientId,
-        branch: input.branch || env.DEADBYTE_BOT_DEFAULT_BRANCH,
+        branch: input.branch || repo.defaultBranch || env.DEADBYTE_BOT_DEFAULT_BRANCH,
+        commitHash: latestVersion?.commitHash,
+        autoStart: input.autoStart ?? false,
         sessionPath,
         repoPath,
         runtimeConfigPath,
@@ -59,39 +65,78 @@ export class InstanceService {
       })
       .returning()
 
-    const commands = await db.select().from(command).where(eq(command.repositorySlug, input.repositorySlug))
-    for (const item of commands) {
-      await db.insert(instanceCommand).values({
-        instanceSlug: input.slug,
-        commandId: item.id,
-        enabled: item.defaultEnabled,
-        ownerOnly: item.defaultOwnerOnly,
-        config: {}
-      })
-    }
-
-    const aliases = await db.select().from(commandAlias).where(eq(commandAlias.repositorySlug, input.repositorySlug))
-    for (const alias of aliases) {
-      await db.insert(instanceCommandAlias).values({
-        instanceSlug: input.slug,
-        commandId: alias.commandId,
-        alias: alias.alias,
-        normalizedAlias: alias.normalizedAlias,
-        source: 'default'
-      })
-    }
-
+    await this.ensureCommands(input.slug)
     await this.runtimeConfig.generate(input.slug)
     return row
   }
 
+  /**
+   * Garante uma linha de configuração para cada comando ativo do repositório.
+   * Comandos novos chegam com os padrões do manifesto; aliases em colisão são ignorados.
+   */
+  async ensureCommands(slug: string) {
+    const row = await this.get(slug)
+    if (!row) {
+      throw new Error(`Instance not found: ${slug}`)
+    }
+
+    const existing = await db.select({ commandId: instanceCommand.commandId }).from(instanceCommand).where(eq(instanceCommand.instanceSlug, slug))
+    const configured = new Set(existing.map((item) => item.commandId))
+    const commands = await db
+      .select()
+      .from(command)
+      .where(and(eq(command.repositorySlug, row.repositorySlug), eq(command.status, 'active')))
+    const missing = commands.filter((item) => !configured.has(item.id))
+    if (!missing.length) {
+      return 0
+    }
+
+    await db
+      .insert(instanceCommand)
+      .values(
+        missing.map((item) => ({
+          instanceSlug: slug,
+          commandId: item.id,
+          enabled: item.defaultEnabled,
+          ownerOnly: item.defaultOwnerOnly,
+          config: {}
+        }))
+      )
+      .onConflictDoNothing()
+
+    const aliases = await db
+      .select()
+      .from(commandAlias)
+      .where(and(eq(commandAlias.repositorySlug, row.repositorySlug), inArray(commandAlias.commandId, missing.map((item) => item.id))))
+    if (aliases.length) {
+      await db
+        .insert(instanceCommandAlias)
+        .values(
+          aliases.map((alias) => ({
+            instanceSlug: slug,
+            commandId: alias.commandId,
+            alias: alias.alias,
+            normalizedAlias: alias.normalizedAlias,
+            source: 'default'
+          }))
+        )
+        .onConflictDoNothing()
+    }
+
+    return missing.length
+  }
+
   async commands(slug: string) {
-    return await db
+    const rows = await db
       .select({
         commandId: command.id,
         commandKey: command.commandKey,
         name: command.name,
         group: command.group,
+        description: command.description,
+        status: command.status,
+        supportsPrivate: command.supportsPrivate,
+        supportsGroups: command.supportsGroups,
         enabled: instanceCommand.enabled,
         ownerOnly: instanceCommand.ownerOnly,
         descriptionOverride: instanceCommand.descriptionOverride,
@@ -101,6 +146,18 @@ export class InstanceService {
       .from(instanceCommand)
       .innerJoin(command, eq(command.id, instanceCommand.commandId))
       .where(eq(instanceCommand.instanceSlug, slug))
+      .orderBy(asc(command.group), asc(command.commandKey))
+
+    const aliases = await db
+      .select({ commandId: instanceCommandAlias.commandId, alias: instanceCommandAlias.alias })
+      .from(instanceCommandAlias)
+      .where(eq(instanceCommandAlias.instanceSlug, slug))
+      .orderBy(asc(instanceCommandAlias.createdAt))
+
+    return rows.map((row) => ({
+      ...row,
+      aliases: aliases.filter((alias) => alias.commandId === row.commandId).map((alias) => alias.alias)
+    }))
   }
 
   async updateCommands(
@@ -137,13 +194,16 @@ export class InstanceService {
           .where(and(eq(instanceCommandAlias.instanceSlug, slug), eq(instanceCommandAlias.commandId, update.commandId)))
 
         for (const alias of update.aliases) {
-          await db.insert(instanceCommandAlias).values({
-            instanceSlug: slug,
-            commandId: update.commandId,
-            alias,
-            normalizedAlias: normalizeCommandName(alias),
-            source: 'custom'
-          })
+          await db
+            .insert(instanceCommandAlias)
+            .values({
+              instanceSlug: slug,
+              commandId: update.commandId,
+              alias,
+              normalizedAlias: normalizeCommandName(alias),
+              source: 'custom'
+            })
+            .onConflictDoNothing()
         }
       }
     }

@@ -6,7 +6,7 @@ import { spawnerPaths } from '../../utils/paths.js'
 
 export class RepositoryService {
   async list() {
-    return await db.select().from(repository)
+    return await db.select().from(repository).orderBy(repository.name)
   }
 
   async get(slug: string) {
@@ -40,7 +40,18 @@ export class RepositoryService {
     return row
   }
 
-  async update(slug: string, patch: Partial<{ name: string; repositoryUrl: string; defaultBranch: string }>) {
+  async update(
+    slug: string,
+    patch: Partial<{
+      name: string
+      repositoryUrl: string
+      defaultBranch: string
+      installCommand: string
+      buildCommand: string
+      startCommand: string
+      manifestCommand: string
+    }>
+  ) {
     const [row] = await db
       .update(repository)
       .set({ ...patch, updatedAt: new Date() })

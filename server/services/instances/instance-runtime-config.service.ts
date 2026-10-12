@@ -3,7 +3,7 @@ import { dirname } from 'pathe'
 import { eq } from 'drizzle-orm'
 import { defineDeadByteConfig, normalizeCommandName } from '@deadbyte/runtime'
 import { db } from '../../db/client.js'
-import { command, instance, instanceCommand, instanceCommandAlias } from '../../db/schema/index.js'
+import { command, commandAlias, instance, instanceCommand, instanceCommandAlias } from '../../db/schema/index.js'
 
 export class InstanceRuntimeConfigService {
   async generate(instanceSlug: string) {
@@ -70,13 +70,28 @@ export class InstanceRuntimeConfigService {
     return { path: row.runtimeConfigPath, config: runtimeConfig }
   }
 
+  /**
+   * Impede que um alias editado colida com o de outro comando.
+   * Aliases que o próprio manifesto compartilha entre comandos continuam permitidos,
+   * porque o match() de cada comando desempata.
+   */
   async validateAliases(instanceSlug: string, changes: Array<{ commandId: string; aliases: string[] }>) {
+    const [row] = await db.select({ repositorySlug: instance.repositorySlug }).from(instance).where(eq(instance.slug, instanceSlug)).limit(1)
+    const defaults = row ? await db.select().from(commandAlias).where(eq(commandAlias.repositorySlug, row.repositorySlug)) : []
+    const sharedByManifest = new Map<string, Set<string>>()
+    for (const item of defaults) {
+      sharedByManifest.set(item.normalizedAlias, (sharedByManifest.get(item.normalizedAlias) ?? new Set()).add(item.commandId))
+    }
+
     const current = await db.select().from(instanceCommandAlias).where(eq(instanceCommandAlias.instanceSlug, instanceSlug))
-    const aliases = new Map(current.map((item) => [item.normalizedAlias, item.commandId]))
+    const owners = new Map<string, Set<string>>()
+    for (const item of current) {
+      owners.set(item.normalizedAlias, (owners.get(item.normalizedAlias) ?? new Set()).add(item.commandId))
+    }
 
     for (const change of changes) {
-      for (const currentAlias of current.filter((item) => item.commandId === change.commandId)) {
-        aliases.delete(currentAlias.normalizedAlias)
+      for (const set of owners.values()) {
+        set.delete(change.commandId)
       }
 
       for (const alias of change.aliases) {
@@ -84,11 +99,12 @@ export class InstanceRuntimeConfigService {
         if (!normalized) {
           throw new Error('Alias cannot be empty.')
         }
-        const existingCommandId = aliases.get(normalized)
-        if (existingCommandId && existingCommandId !== change.commandId) {
-          throw new Error(`Alias collision: ${alias}`)
+        const allowed = sharedByManifest.get(normalized)
+        const conflicting = [...(owners.get(normalized) ?? [])].filter((id) => id !== change.commandId && !(allowed?.has(id) && allowed.has(change.commandId)))
+        if (conflicting.length) {
+          throw new Error(`O alias "${alias}" já é usado por outro comando.`)
         }
-        aliases.set(normalized, change.commandId)
+        owners.set(normalized, (owners.get(normalized) ?? new Set()).add(change.commandId))
       }
     }
   }

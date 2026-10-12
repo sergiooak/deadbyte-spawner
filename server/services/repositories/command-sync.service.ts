@@ -95,12 +95,20 @@ export class CommandSyncService {
           addedCommands += 1
         }
 
+        // Variantes com e sem acento (ex.: "música"/"musica") viram um único alias normalizado.
+        const uniqueAliases = new Map<string, string>()
         for (const alias of manifestCommand.aliases) {
+          const normalized = normalizeCommandName(alias)
+          if (normalized && !uniqueAliases.has(normalized)) {
+            uniqueAliases.set(normalized, alias)
+          }
+        }
+        for (const [normalizedAlias, alias] of uniqueAliases) {
           await tx.insert(commandAlias).values({
             repositorySlug: input.repositorySlug,
             commandId: row.id,
             alias,
-            normalizedAlias: normalizeCommandName(alias)
+            normalizedAlias
           })
           aliasesCount += 1
         }

@@ -10,6 +10,15 @@
 
     <p v-if="status !== 'ready'" class="text-sm text-muted">Conecte o WhatsApp para ver e reprocessar mensagens pendentes.</p>
 
+    <UAlert
+      v-else-if="outdated"
+      color="warning"
+      variant="subtle"
+      icon="i-nucleo-triangle-warning"
+      title="Bot desatualizado"
+      description="Esta versão do bot não tem o reprocessamento. Sincronize o repositório e reinicie a instância."
+    />
+
     <div v-else class="space-y-4">
       <dl class="grid gap-4 sm:grid-cols-2">
         <div class="min-w-0">
@@ -61,10 +70,18 @@ const props = defineProps<{ slug: string; status: string }>()
 const base = computed(() => `/api/instances/${props.slug}/bot`)
 const state = ref<CatchUpState>()
 const starting = ref<Mode | ''>('')
+// Bots anteriores ao reprocessamento respondem 404 nesta rota.
+const outdated = ref(false)
 
 async function load() {
   if (props.status !== 'ready') return
-  state.value = await apiRequest<CatchUpState>(`${base.value}/catch-up`).catch(() => state.value)
+  try {
+    state.value = await apiRequest<CatchUpState>(`${base.value}/catch-up`)
+    outdated.value = false
+  } catch (error) {
+    const status = (error as { statusCode?: number; status?: number }).statusCode ?? (error as { status?: number }).status
+    outdated.value = status === 404
+  }
 }
 
 async function start(mode: Mode) {

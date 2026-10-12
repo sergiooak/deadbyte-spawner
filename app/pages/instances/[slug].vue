@@ -62,7 +62,7 @@
                   <UButton color="neutral" variant="link" size="sm" trailing-icon="i-nucleo-arrow-right" @click="tab = 'events'">Todos os eventos</UButton>
                 </div>
               </template>
-              <EventTimeline :events="(events ?? []).slice(0, 6)" />
+              <ActivityFeed :events="events ?? []" :command-names="commandNames" :limit="8" />
             </UCard>
           </div>
         </div>
@@ -82,8 +82,23 @@
         <LogViewer v-else-if="tab === 'logs'" v-model:auto-refresh="liveLogs" :logs="logs ?? []" height-class="h-[calc(100dvh-14rem)] min-h-96" />
 
         <!-- Eventos -->
+        <!-- WhatsApp: perfil e configurações do número -->
+        <InstanceWhatsappProfile v-else-if="tab === 'whatsapp'" :slug="slug" :status="instance.status" />
+
+        <!-- Controle remoto -->
+        <InstanceRemoteControl v-else-if="tab === 'remote'" :slug="slug" :status="instance.status" />
+
         <UCard v-else-if="tab === 'events'">
-          <EventTimeline :events="events ?? []" />
+          <template #header>
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-pixel text-lg text-highlighted">Atividade</h3>
+              <div class="flex flex-wrap items-center gap-3">
+                <USwitch v-if="activityMode !== 'debug'" v-model="showIgnored" size="sm" label="Mensagens sem comando" />
+                <UTabs v-model="activityMode" :items="activityModes" :content="false" size="xs" variant="pill" />
+              </div>
+            </div>
+          </template>
+          <ActivityFeed :events="events ?? []" :command-names="commandNames" :hide-ignored="!showIgnored" :mode="activityMode" />
         </UCard>
 
         <!-- Configurações -->
@@ -168,7 +183,7 @@ import type { Instance, InstanceCommand, ProcessLog, RuntimeEvent } from '~/type
 const route = useRoute()
 const slug = computed(() => String(route.params.slug))
 
-const validTabs = ['overview', 'commands', 'logs', 'events', 'settings']
+const validTabs = ['overview', 'commands', 'whatsapp', 'remote', 'logs', 'events', 'settings']
 const tab = computed({
   get: () => (validTabs.includes(String(route.query.tab)) ? String(route.query.tab) : 'overview'),
   set: (value: string) => navigateTo({ query: { ...route.query, tab: value === 'overview' ? undefined : value } }, { replace: true })
@@ -177,7 +192,31 @@ const tab = computed({
 const { data: instance, refresh: refreshInstance, error } = await useApi<Instance>(() => `/api/instances/${slug.value}`)
 const { data: commands, refresh: refreshCommands } = await useApi<InstanceCommand[]>(() => `/api/instances/${slug.value}/commands`)
 const { data: logs, refresh: refreshLogs } = await useApi<ProcessLog[]>(() => `/api/instances/${slug.value}/logs`, { query: { limit: 500 } })
-const { data: events, refresh: refreshEvents } = await useApi<RuntimeEvent[]>(() => `/api/instances/${slug.value}/events`, { query: { limit: 100 } })
+const { data: events, refresh: refreshEvents } = await useApi<RuntimeEvent[]>(() => `/api/instances/${slug.value}/events`, { query: { limit: 400 } })
+const showIgnored = ref(false)
+const activityModes = [
+  { label: 'Simples', icon: 'i-nucleo-bullet-list', value: 'simple' },
+  { label: 'Detalhado', icon: 'i-nucleo-sliders', value: 'detailed' },
+  { label: 'Debug', icon: 'i-nucleo-console', value: 'debug' }
+]
+// Modo preferido fica salvo neste navegador.
+const activityMode = ref<'simple' | 'detailed' | 'debug'>('simple')
+onMounted(() => {
+  try {
+    const saved = localStorage.getItem('deadbyte:activity-mode')
+    if (saved === 'simple' || saved === 'detailed' || saved === 'debug') activityMode.value = saved
+  } catch {
+    // armazenamento indisponível: fica no padrão
+  }
+})
+watch(activityMode, (value) => {
+  try {
+    localStorage.setItem('deadbyte:activity-mode', value)
+  } catch {
+    // sem persistência, sem problema
+  }
+})
+const commandNames = computed(() => new Map((commands.value ?? []).map((item) => [item.commandKey, item.name])))
 
 useHead({ title: () => `${instance.value?.name ?? 'Instância'} · DeadByte` })
 
@@ -188,7 +227,9 @@ const tabs = computed<TabsItem[]>(() => [
   { label: 'Visão geral', icon: 'i-nucleo-gauge', value: 'overview' },
   { label: 'Comandos', icon: 'i-nucleo-console', value: 'commands', badge: commands.value?.length ? { label: String(enabledCommands.value), color: 'neutral', variant: 'soft' } : undefined },
   { label: 'Logs', icon: 'i-nucleo-scroll', value: 'logs' },
-  { label: 'Eventos', icon: 'i-nucleo-heartbeat', value: 'events' },
+  { label: 'WhatsApp', icon: 'i-nucleo-mobile-check', value: 'whatsapp' },
+  { label: 'Controle remoto', icon: 'i-nucleo-chat-bubble', value: 'remote' },
+  { label: 'Atividade', icon: 'i-nucleo-heartbeat', value: 'events' },
   { label: 'Configurações', icon: 'i-nucleo-sliders', value: 'settings' }
 ])
 
@@ -196,9 +237,25 @@ async function refreshAll() {
   await Promise.all([refreshInstance(), refreshEvents(), refreshLogs()])
 }
 
-usePolling(() => refreshInstance(), 3000)
-usePolling(() => refreshEvents(), 5000)
-usePolling(() => refreshLogs(), 2500, () => tab.value === 'logs' && liveLogs.value)
+// Tempo real: eventos, status e linhas de log chegam pelo WebSocket; o polling só roda se ele cair.
+const { connected: live } = useRealtime({
+  slugs: () => [slug.value],
+  logs: () => tab.value === 'logs' && liveLogs.value,
+  onMessage(message) {
+    if (!('slug' in message) || message.slug !== slug.value) return
+    if (message.type === 'instance.status') void refreshInstance()
+    if (message.type === 'instance.event' && events.value) events.value = [message.event, ...events.value].slice(0, 400)
+    if (message.type === 'instance.log' && logs.value && liveLogs.value) {
+      logs.value = [{ id: Date.now() + Math.random(), instanceSlug: slug.value, ...message.log }, ...logs.value].slice(0, 1000)
+    }
+  }
+})
+
+usePolling(() => refreshInstance(), 3000, () => !live.value)
+usePolling(() => refreshEvents(), 5000, () => !live.value)
+usePolling(() => refreshLogs(), 2500, () => !live.value && tab.value === 'logs' && liveLogs.value)
+// Reserva leve mesmo com WebSocket (ex.: mudanças feitas por outra aba).
+usePolling(() => refreshInstance(), 30_000)
 
 const details = computed(() => {
   const item = instance.value

@@ -6,7 +6,7 @@ import { InstanceService } from './instance.service.js'
  * Chama a API interna (h3 + listhen) de um bot em execução, no mesmo container.
  * Erros do bot viram erros HTTP com a mesma mensagem.
  */
-export async function callBotApi<T>(slug: string, path: string, options: { method?: 'GET' | 'POST' | 'DELETE'; body?: Record<string, unknown> } = {}): Promise<T> {
+export async function callBotApi<T>(slug: string, path: string, options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'; body?: Record<string, unknown> } = {}): Promise<T> {
   const instance = await new InstanceService().get(slug)
   if (!instance) {
     throw createError({ statusCode: 404, statusMessage: 'Instance not found.' })

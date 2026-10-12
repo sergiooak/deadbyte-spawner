@@ -11,6 +11,13 @@ import { repositorySyncService } from '../services/repositories/repository-sync.
 import { readSpawnerEnv } from './env.js'
 import { spawnerPaths } from './paths.js'
 
+/**
+ * A LGPD não fixa prazo máximo: os dados ficam enquanto servirem à finalidade (arts. 15 e 16).
+ * 180 dias acompanha o Marco Civil da Internet (art. 15), que exige guardar registros de acesso
+ * a aplicações por 6 meses. Prazo maior precisa de justificativa documentada.
+ */
+export const DEFAULT_LOG_RETENTION_DAYS = 180
+
 const RUNNING_STATUSES = ['installing', 'starting', 'waiting_qr', 'authenticated', 'ready', 'disconnected', 'stopping']
 
 let bootstrapPromise: Promise<void> | undefined
@@ -67,7 +74,7 @@ export async function resumeInstances() {
 }
 
 export async function pruneOldLogs() {
-  const days = Number(process.env.DEADBYTE_LOG_RETENTION_DAYS ?? 7)
+  const days = Number(process.env.DEADBYTE_LOG_RETENTION_DAYS ?? DEFAULT_LOG_RETENTION_DAYS)
   if (!Number.isFinite(days) || days <= 0) {
     return
   }

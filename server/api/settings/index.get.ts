@@ -1,6 +1,7 @@
 import { eventHandler } from 'h3'
 import { childProcessManager } from '../../services/process/child-process-manager.js'
 import { readSpawnerEnv } from '../../utils/env.js'
+import { DEFAULT_LOG_RETENTION_DAYS } from '../../utils/bootstrap.js'
 import { spawnerPaths } from '../../utils/paths.js'
 
 /** Informações de ambiente para o painel. Nunca devolve valores de segredos, só se estão definidos. */
@@ -28,11 +29,12 @@ export default eventHandler(() => {
       chromePath: env.DEADBYTE_CHROME_PATH || null,
       ffmpegPath: env.FFMPEG_PATH || null,
       rembgUrl: process.env.DEADBYTE_REMBG_URL || null,
-      logRetentionDays: Number(process.env.DEADBYTE_LOG_RETENTION_DAYS ?? 7)
+      logRetentionDays: Number(process.env.DEADBYTE_LOG_RETENTION_DAYS ?? DEFAULT_LOG_RETENTION_DAYS)
     },
     secrets: {
       DEADBYTE_ADMIN_PASSWORD: isSet('DEADBYTE_ADMIN_PASSWORD'),
       DEADBYTE_TEXAS_API_KEY: isSet('DEADBYTE_TEXAS_API_KEY'),
+      DEADBYTE_TTP_API_KEY: isSet('DEADBYTE_TTP_API_KEY'),
       DEADBYTE_TYPESAFE_API_KEY: isSet('DEADBYTE_TYPESAFE_API_KEY'),
       DEADBYTE_OPENAI_API_KEY: isSet('DEADBYTE_OPENAI_API_KEY')
     }

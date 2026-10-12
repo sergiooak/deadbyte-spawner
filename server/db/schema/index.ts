@@ -29,6 +29,8 @@ export const repository = pgTable(
     buildCommand: text('build_command').notNull().default('pnpm build'),
     startCommand: text('start_command').notNull().default('node dist/cli/index.mjs start'),
     manifestCommand: text('manifest_command').notNull().default('pnpm manifest'),
+    // Repositório oficial do DeadByte: criado no boot, não pode ser excluído nem ter a URL trocada.
+    official: boolean('official').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
   },

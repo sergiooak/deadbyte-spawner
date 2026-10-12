@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { rm } from 'node:fs/promises'
 import { db } from '../../db/client.js'
 import { repository } from '../../db/schema/index.js'
@@ -6,7 +6,7 @@ import { spawnerPaths } from '../../utils/paths.js'
 
 export class RepositoryService {
   async list() {
-    return await db.select().from(repository).orderBy(repository.name)
+    return await db.select().from(repository).orderBy(desc(repository.official), repository.name)
   }
 
   async get(slug: string) {

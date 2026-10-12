@@ -9,6 +9,7 @@
           <div class="flex min-w-0 items-center gap-3">
             <UButton to="/repositories" icon="i-nucleo-arrow-left" color="neutral" variant="ghost" size="sm" aria-label="Voltar" />
             <span class="truncate">{{ repository?.name ?? slug }}</span>
+            <UBadge v-if="repository?.official" color="primary" variant="solid" size="sm" icon="i-nucleo-shield-check">oficial</UBadge>
           </div>
         </template>
         <template #right>
@@ -144,7 +145,9 @@
                 <UFormField label="Nome" name="name"><UInput v-model="form.name" class="w-full" /></UFormField>
                 <UFormField label="Branch padrão" name="defaultBranch"><UInput v-model="form.defaultBranch" class="w-full font-mono" /></UFormField>
               </div>
-              <UFormField label="URL do git" name="repositoryUrl"><UInput v-model="form.repositoryUrl" class="w-full font-mono" /></UFormField>
+              <UFormField label="URL do git" name="repositoryUrl" :help="repository.official ? 'Definida por DEADBYTE_BOT_DEFAULT_REPOSITORY_URL.' : undefined">
+                <UInput v-model="form.repositoryUrl" class="w-full font-mono" :disabled="repository.official" />
+              </UFormField>
               <USeparator label="Comandos de build" />
               <div class="grid gap-4 sm:grid-cols-2">
                 <UFormField label="Instalar" name="installCommand"><UInput v-model="form.installCommand" class="w-full font-mono" /></UFormField>
@@ -158,7 +161,15 @@
             </UForm>
           </UPageCard>
 
-          <UPageCard title="Zona de perigo" variant="subtle" :ui="{ root: 'ring-error/30', title: 'text-error' }">
+          <UAlert
+            v-if="repository.official"
+            color="primary"
+            variant="subtle"
+            icon="i-nucleo-shield-check"
+            title="Repositório oficial"
+            description="Não pode ser excluído e é recriado a cada boot. Para testar outro código, cadastre um fork como novo repositório."
+          />
+          <UPageCard v-else title="Zona de perigo" variant="subtle" :ui="{ root: 'ring-error/30', title: 'text-error' }">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p class="font-medium text-highlighted">Excluir repositório</p>
@@ -223,6 +234,12 @@ async function sync() {
     await Promise.all([refreshRepository(), refreshCommands(), refreshVersions()])
   }
 }
+
+useRealtime({
+  onMessage(message) {
+    if (message.type === 'repository.sync' && message.slug === slug.value) void refreshRepository()
+  }
+})
 
 // Sync iniciado em outra aba ou logo após o cadastro.
 usePolling(refreshRepository, 4000, () => Boolean(repository.value?.syncing) && !syncRequested.value)

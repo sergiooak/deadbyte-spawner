@@ -46,6 +46,7 @@ export type Repository = {
   buildCommand: string
   startCommand: string
   manifestCommand: string
+  official: boolean
   createdAt: string
   updatedAt: string
   syncing?: boolean

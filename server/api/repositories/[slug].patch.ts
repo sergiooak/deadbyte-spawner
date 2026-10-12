@@ -1,4 +1,5 @@
 import { createError, eventHandler, readValidatedBody } from 'h3'
+import { createError as createEvlogError } from 'evlog'
 import { z } from 'zod'
 import { RepositoryService } from '../../services/repositories/repository.service.js'
 import { requireSlug } from '../../utils/http.js'
@@ -16,7 +17,17 @@ const BodySchema = z.object({
 export default eventHandler(async (event) => {
   const slug = requireSlug(event)
   const body = await readValidatedBody(event, (value) => BodySchema.parse(value))
-  const row = await new RepositoryService().update(slug, body)
+  const service = new RepositoryService()
+  const current = await service.get(slug)
+  if (current?.official && body.repositoryUrl && body.repositoryUrl !== current.repositoryUrl) {
+    throw createEvlogError({
+      message: 'A URL do repositório oficial não pode ser alterada',
+      status: 403,
+      why: 'Ela vem de DEADBYTE_BOT_DEFAULT_REPOSITORY_URL.',
+      fix: 'Cadastre o fork como um novo repositório, ou mude a variável de ambiente se o oficial mudou de endereço.'
+    })
+  }
+  const row = await service.update(slug, body)
   if (!row) {
     throw createError({ statusCode: 404, statusMessage: 'Repository not found.' })
   }

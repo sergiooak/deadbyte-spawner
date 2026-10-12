@@ -6,7 +6,7 @@
           <UDashboardSidebarCollapse />
         </template>
         <template #right>
-          <UButton icon="i-nucleo-plus" @click="createOpen = true">Novo repositório</UButton>
+          <UButton icon="i-nucleo-code-fork" @click="createOpen = true">Adicionar fork</UButton>
         </template>
       </UDashboardNavbar>
     </template>
@@ -26,14 +26,17 @@
           v-for="repository in repositories"
           :key="repository.slug"
           :to="`/repositories/${repository.slug}`"
-          variant="subtle"
+          :variant="repository.official ? 'outline' : 'subtle'"
           icon="i-simple-icons-github"
           :title="repository.name"
           :description="repoLabel(repository.repositoryUrl)"
-          :ui="{ description: 'font-mono text-xs truncate' }"
+          :ui="{ description: 'font-mono text-xs truncate', leading: repository.official ? 'text-primary' : '' }"
+          :class="repository.official ? 'neon-ring bg-primary/5' : ''"
         >
+          <UBadge v-if="repository.official" color="primary" variant="solid" size="sm" icon="i-nucleo-shield-check" class="absolute end-3 top-3">oficial</UBadge>
           <div class="flex flex-wrap items-center gap-2 text-xs text-muted">
             <UBadge color="neutral" variant="soft" icon="i-nucleo-code-branch" size="sm">{{ repository.defaultBranch }}</UBadge>
+            <UBadge v-if="!repository.official" color="neutral" variant="soft" icon="i-nucleo-code-fork" size="sm">fork</UBadge>
             <UBadge color="neutral" variant="soft" icon="i-nucleo-robot" size="sm">
               {{ instanceCount(repository.slug) }} {{ instanceCount(repository.slug) === 1 ? 'instância' : 'instâncias' }}
             </UBadge>

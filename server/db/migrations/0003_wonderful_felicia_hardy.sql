@@ -1,0 +1,1 @@
+ALTER TABLE "repository" ADD COLUMN "official" boolean DEFAULT false NOT NULL;

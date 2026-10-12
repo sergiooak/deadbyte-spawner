@@ -37,3 +37,7 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+
+# Catálogo completo do Nucleo: licença paga, não pode ir para repo público (só a coleção recortada icons/nucleo.json vai)
+icons/nucleo-source.json
+.tmp/

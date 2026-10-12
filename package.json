@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxt build",
+    "build": "node cli/nucleo.mjs check && nuxt build",
     "start": "node .output/server/index.mjs",
     "typecheck": "nuxt typecheck",
     "lint": "eslint .",
@@ -14,7 +14,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "icons:build": "node cli/nucleo.mjs build",
+    "icons:check": "node cli/nucleo.mjs check"
   },
   "dependencies": {
     "@deadbyte/runtime": "^4.0.1",
@@ -36,7 +38,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.142",
     "@iconify-json/simple-icons": "^1.2.99",
     "@types/node": "^25.9.1",
     "@types/qrcode": "^1.5.6",

@@ -13,3 +13,5 @@ node_modules
 coverage
 Dockerfile
 docker-compose*.yml
+icons/nucleo-source.json
+.tmp

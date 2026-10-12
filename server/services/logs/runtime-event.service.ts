@@ -26,13 +26,13 @@ export class RuntimeEventService {
     }
 
     if (event.name === 'whatsapp.authenticated') {
-      await db.update(instance).set({ status: 'authenticated', updatedAt: new Date() }).where(eq(instance.slug, instanceSlug))
+      await db.update(instance).set({ status: 'authenticated', lastQr: null, updatedAt: new Date() }).where(eq(instance.slug, instanceSlug))
     }
 
     if (event.name === 'whatsapp.ready') {
       await db
         .update(instance)
-        .set({ status: 'ready', lastReadyAt: new Date(), lastHeartbeatAt: new Date(), updatedAt: new Date() })
+        .set({ status: 'ready', lastQr: null, lastReadyAt: new Date(), lastHeartbeatAt: new Date(), updatedAt: new Date() })
         .where(eq(instance.slug, instanceSlug))
     }
 

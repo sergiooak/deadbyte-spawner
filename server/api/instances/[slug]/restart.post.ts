@@ -1,10 +1,8 @@
-import { createError, eventHandler, getRouterParam } from 'h3'
+import { eventHandler } from 'h3'
 import { childProcessManager } from '../../../services/process/child-process-manager.js'
+import { requireSlug, withHttpErrors } from '../../../utils/http.js'
 
 export default eventHandler(async (event) => {
-  const slug = getRouterParam(event, 'slug')
-  if (!slug) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing slug.' })
-  }
-  return await childProcessManager.restart(slug)
+  const slug = requireSlug(event)
+  return await withHttpErrors(() => childProcessManager.restart(slug))
 })

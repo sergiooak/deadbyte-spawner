@@ -157,5 +157,5 @@ Scene:
 
 ## Depois de gerar
 
-- Troque os arquivos em `public/brand/` mantendo os nomes. O painel já aponta para eles.
+- Troque os arquivos em `public/brand/` mantendo os nomes e rode `python -I brand/optimize.py`. O painel serve as cópias leves de `public/brand/web/` (WebP e o JPG do OG); os favicons e o `icon-512.png` são usados direto.
 - A cor de destaque das artes (por volta de `#00F5C4`, aqua-menta) é mais ciano que o primary atual do painel (`emerald`, `#34D399`). Se o brandbook confirmar o aqua, dá para trocar o primary do painel para uma paleta customizada com esse tom.

@@ -14,4 +14,6 @@ coverage
 Dockerfile
 docker-compose*.yml
 icons/nucleo-source.json
+# Referências e originais do brandbook; o painel usa só public/brand
+/brand
 .tmp

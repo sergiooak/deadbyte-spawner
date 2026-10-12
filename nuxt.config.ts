@@ -38,7 +38,7 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#000000' },
         { property: 'og:title', content: 'DeadByte Spawner' },
         { property: 'og:description', content: 'Painel dos bots de figurinhas DeadByte.' },
-        { property: 'og:image', content: '/brand/og-image.png' }
+        { property: 'og:image', content: '/brand/web/og-image.jpg' }
       ],
       // Arquivos do brandbook em public/brand/ (prompts em brand/PROMPTS.md)
       link: [

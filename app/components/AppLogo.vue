@@ -1,4 +1,4 @@
 <template>
-  <!-- Logo mark do brandbook (public/brand/logo-mark.png). Placeholder atual: caveira robótica em pixel art. -->
-  <img src="/brand/logo-mark.png" alt="DeadByte" width="1024" height="1024" class="object-contain [image-rendering:pixelated] drop-shadow-[0_0_6px_var(--ui-primary)]" />
+  <!-- Logo mark do brandbook, versão leve gerada por brand/optimize.py a partir de public/brand/logo-mark.png -->
+  <img src="/brand/web/logo-mark.webp" alt="DeadByte" width="256" height="256" class="object-contain drop-shadow-[0_0_6px_var(--ui-primary)]" />
 </template>

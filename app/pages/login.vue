@@ -3,7 +3,7 @@
     <div class="flex flex-col items-center gap-3 text-center">
       <AppLogo class="size-14" />
       <div>
-        <h1 class="font-pixel text-3xl neon-text">DeadByte</h1>
+        <h1><img src="/brand/web/wordmark.webp" alt="DeadByte" width="800" height="200" class="mx-auto h-auto w-56" /></h1>
         <p class="mt-2 font-mono text-xs tracking-[0.3em] text-muted uppercase">Spawner · acesso restrito</p>
       </div>
     </div>

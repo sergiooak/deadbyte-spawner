@@ -1,7 +1,7 @@
-import { createError, eventHandler, getRouterParam, readValidatedBody } from 'h3'
-import { ofetch } from 'ofetch'
+import { eventHandler, readValidatedBody } from 'h3'
 import { z } from 'zod'
-import { InstanceService } from '../../../services/instances/instance.service.js'
+import { callBotApi } from '../../../services/instances/bot-internal-api.js'
+import { requireSlug } from '../../../utils/http.js'
 
 const BodySchema = z.object({
   chatId: z.string().min(1),
@@ -9,17 +9,7 @@ const BodySchema = z.object({
 })
 
 export default eventHandler(async (event) => {
-  const slug = getRouterParam(event, 'slug')
-  if (!slug) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing slug.' })
-  }
+  const slug = requireSlug(event)
   const body = await readValidatedBody(event, (value) => BodySchema.parse(value))
-  const instance = await new InstanceService().get(slug)
-  if (!instance?.internalPort) {
-    throw createError({ statusCode: 409, statusMessage: 'Instance internal API is not configured.' })
-  }
-  return await ofetch(`http://${instance.internalHost}:${instance.internalPort}/send-message`, {
-    method: 'POST',
-    body
-  })
+  return await callBotApi(slug, '/send-message', { method: 'POST', body })
 })

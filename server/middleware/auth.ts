@@ -39,7 +39,8 @@ export default defineEventHandler(async (event) => {
     await ensureBootstrapped()
   }
 
-  if (PUBLIC_API_PATHS.has(pathname)) {
+  // Ícones não são sensíveis e a tela de login precisa deles.
+  if (PUBLIC_API_PATHS.has(pathname) || pathname.startsWith('/api/_nuxt_icon/')) {
     return
   }
 

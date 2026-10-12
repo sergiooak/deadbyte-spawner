@@ -8,6 +8,20 @@
       "when": 1780170330211,
       "tag": "0000_wealthy_warbird",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791815860659,
+      "tag": "0001_great_eternity",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791817093469,
+      "tag": "0002_parched_shiva",
+      "breakpoints": true
     }
   ]
 }

@@ -105,7 +105,8 @@ export const commandAlias = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
   },
   (table) => ({
-    pk: primaryKey({ columns: [table.repositorySlug, table.normalizedAlias] }),
+    // O mesmo alias pode pertencer a mais de um comando: o match() de cada comando desempata (ex.: com ou sem argumentos).
+    pk: primaryKey({ name: 'command_alias_pk', columns: [table.repositorySlug, table.commandId, table.normalizedAlias] }),
     commandIdIndex: index('command_alias_command_id_idx').on(table.commandId),
     repositoryAliasIndex: index('command_alias_repository_slug_normalized_alias_idx').on(table.repositorySlug, table.normalizedAlias)
   })
@@ -131,6 +132,7 @@ export const instance = pgTable(
     internalHost: text('internal_host').notNull().default('127.0.0.1'),
     internalPort: integer('internal_port'),
     lastQr: text('last_qr'),
+    autoStart: boolean('auto_start').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     startedAt: timestamp('started_at', { withTimezone: true }),
@@ -189,7 +191,8 @@ export const instanceCommandAlias = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
   },
   (table) => ({
-    pk: primaryKey({ columns: [table.instanceSlug, table.normalizedAlias] }),
+    pk: primaryKey({ name: 'instance_command_alias_pk', columns: [table.instanceSlug, table.commandId, table.normalizedAlias] }),
+    instanceAliasIndex: index('instance_command_alias_instance_slug_normalized_alias_idx').on(table.instanceSlug, table.normalizedAlias),
     sourceCheck: check('instance_command_alias_source_check', sql`${table.source} in ('default', 'custom')`),
     commandIdIndex: index('instance_command_alias_command_id_idx').on(table.commandId)
   })

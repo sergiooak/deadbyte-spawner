@@ -6,7 +6,8 @@ const databaseUrl = process.env.DATABASE_URL ?? 'postgres://deadbyte:deadbyte@lo
 
 export const sqlClient = postgres(databaseUrl, {
   max: 10,
-  prepare: false
+  prepare: false,
+  onnotice: () => undefined
 })
 
 export const db = drizzle(sqlClient, { schema })
